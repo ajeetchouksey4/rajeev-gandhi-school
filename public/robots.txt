@@ -1,0 +1,9 @@
+# Robots.txt for Rajeev Gandhi Convent Higher Secondary School
+# https://ajeetchouksey4.github.io/rajeev-gandhi-school/
+
+# Allow all web crawlers to access all content
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://ajeetchouksey4.github.io/rajeev-gandhi-school/sitemap.xml
