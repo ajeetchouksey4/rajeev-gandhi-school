@@ -2,6 +2,7 @@ import React from 'react'
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
 import About from './components/About'
+import PrincipalDesk from './components/PrincipalDesk'
 import Academics from './components/Academics'
 import Facilities from './components/Facilities'
 import RecentActivities from './components/RecentActivities'
@@ -19,6 +20,7 @@ function App() {
       <Navbar />
       <Hero />
       <About />
+      <PrincipalDesk />
       <Academics />
       <Facilities />
       <RecentActivities />
