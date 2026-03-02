@@ -1,0 +1,109 @@
+.academics {
+    position: relative;
+    background: var(--gray-50);
+}
+
+.academics-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 22px;
+}
+
+.academic-card {
+    padding: 32px 24px;
+    position: relative;
+    overflow: hidden;
+    background: var(--white);
+    border: 1px solid var(--gray-200);
+}
+
+.academic-accent-line {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--card-accent);
+    transform: scaleX(0);
+    transition: transform 0.4s cubic-bezier(.4, 0, .2, 1);
+}
+
+.academic-card:hover .academic-accent-line {
+    transform: scaleX(1);
+}
+
+.academic-card:hover {
+    border-color: var(--maroon-100);
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+}
+
+.academic-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: var(--radius-md);
+    background: color-mix(in srgb, var(--card-accent) 10%, white);
+    border: 1px solid color-mix(in srgb, var(--card-accent) 20%, white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--card-accent);
+    margin-bottom: 18px;
+    transition: var(--transition);
+}
+
+.academic-card:hover .academic-icon {
+    transform: scale(1.06);
+}
+
+.academic-card h3 {
+    font-family: var(--font-heading);
+    font-size: 1.15rem;
+    color: var(--gray-800);
+    margin-bottom: 4px;
+}
+
+.academic-classes {
+    display: inline-block;
+    font-family: var(--font-accent);
+    font-size: .68rem;
+    font-weight: 600;
+    color: var(--gray-400);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 12px;
+}
+
+.academic-card>p {
+    color: var(--gray-500);
+    font-size: .9rem;
+    margin-bottom: 16px;
+    line-height: 1.7;
+}
+
+.academic-card ul li {
+    font-size: .84rem;
+    color: var(--gray-500);
+    padding: 4px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.check {
+    color: var(--success);
+    font-weight: 700;
+    font-size: .9rem;
+}
+
+@media (max-width: 1024px) {
+    .academics-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .academics-grid {
+        grid-template-columns: 1fr;
+    }
+}

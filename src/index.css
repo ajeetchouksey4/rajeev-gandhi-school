@@ -1,0 +1,126 @@
+/* ============================================
+   LIGHT THEME · MAROON & WHITE
+   School-inspired clean design system
+   ============================================ */
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  /* Maroon shades */
+  --maroon-900: #4a0e1b;
+  --maroon-800: #5c1325;
+  --maroon-700: #72182e;
+  --maroon-600: #881d38;
+  --maroon-500: #9b1b30;
+  --maroon-400: #b8293f;
+  --maroon-300: #d44a60;
+  --maroon-200: #e89aa8;
+  --maroon-100: #f4cdd4;
+  --maroon-50: #fdf0f2;
+
+  /* Warm neutrals */
+  --white: #ffffff;
+  --cream: #fefcfb;
+  --gray-50: #faf8f7;
+  --gray-100: #f3f0ee;
+  --gray-200: #e8e3e0;
+  --gray-300: #d5cdc9;
+  --gray-400: #a89f9a;
+  --gray-500: #7a716c;
+  --gray-600: #5c5450;
+  --gray-700: #443d3a;
+  --gray-800: #2d2724;
+  --gray-900: #1a1614;
+
+  /* Accent gold for warmth */
+  --gold-500: #c9953c;
+  --gold-400: #d4a94f;
+  --gold-300: #e0bd6e;
+  --gold-100: #f5e8c8;
+
+  --success: #2d8a56;
+  --info: #3b7fc4;
+
+  --font-heading: 'Playfair Display', Georgia, serif;
+  --font-body: 'Nunito', 'Poppins', sans-serif;
+  --font-accent: 'Poppins', sans-serif;
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, .06);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, .07);
+  --shadow-lg: 0 8px 30px rgba(0, 0, 0, .09);
+  --shadow-xl: 0 16px 48px rgba(0, 0, 0, .1);
+  --shadow-maroon: 0 4px 20px rgba(155, 27, 48, .15);
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 80px;
+}
+
+body {
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--gray-700);
+  background: var(--white);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+ul {
+  list-style: none;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--gray-100);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--maroon-300);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--maroon-500);
+}
+
+::selection {
+  background: rgba(155, 27, 48, 0.15);
+  color: var(--maroon-800);
+}
