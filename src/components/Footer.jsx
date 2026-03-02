@@ -1,5 +1,6 @@
 import React from 'react'
-import { GraduationCap, Facebook, Instagram, Youtube, Twitter } from 'lucide-react'
+import { Facebook, Instagram, Youtube, Twitter } from 'lucide-react'
+import logo from '../assets/school-logo.png'
 import './Footer.css'
 
 const Footer = () => (
@@ -8,8 +9,8 @@ const Footer = () => (
             <div className="footer-grid">
                 <div className="footer-about">
                     <div className="footer-logo">
-                        <GraduationCap size={24} />
-                        <span>Rajeev Gandhi Convent HSS</span>
+                        <img src={logo} alt="Rajeev Gandhi Convent Logo" className="footer-logo-img" />
+                        <span>Rajeev Gandhi Convent Higher Secondary School</span>
                     </div>
                     <p>
                         Affiliated to MPBSE, providing quality education from Nursery to Class 12th. Building future leaders with values and knowledge.

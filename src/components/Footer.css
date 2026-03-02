@@ -16,16 +16,18 @@
 .footer-logo {
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 14px;
+    gap: 12px;
+    margin-bottom: 16px;
     font-family: var(--font-heading);
     font-weight: 700;
-    font-size: .9rem;
+    font-size: 1.1rem;
     color: var(--white);
 }
 
-.footer-logo svg {
-    color: var(--maroon-300);
+.footer-logo-img {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
 }
 
 .footer-about p {

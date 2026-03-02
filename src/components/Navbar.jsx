@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { GraduationCap, Menu, X } from 'lucide-react'
+import logo from '../assets/school-logo.png'
 import './Navbar.css'
 
 const navItems = [
@@ -46,7 +47,7 @@ const Navbar = () => {
             <div className="container nav-container">
                 <a href="#home" className="nav-logo" onClick={(e) => { e.preventDefault(); handleNavClick('#home') }}>
                     <div className="logo-icon">
-                        <GraduationCap size={22} />
+                        <img src={logo} alt="Rajeev Gandhi Convent Logo" />
                     </div>
                     <div className="logo-text">
                         <span className="logo-name">Rajeev Gandhi Convent</span>
@@ -67,15 +68,6 @@ const Navbar = () => {
                             </a>
                         </li>
                     ))}
-                    <li>
-                        <a
-                            href="#admissions"
-                            className="nav-link nav-cta"
-                            onClick={(e) => { e.preventDefault(); handleNavClick('#admissions') }}
-                        >
-                            🚀 Admissions Open
-                        </a>
-                    </li>
                 </ul>
 
                 <button

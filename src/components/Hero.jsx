@@ -64,26 +64,26 @@ const Hero = () => {
             <div className="hero-shape hero-shape-3" />
 
             <div className="container hero-content">
-                <motion.div
-                    className="hero-badge"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.2 }}
-                >
-                    <Award size={16} />
-                    <span>MPBSE Affiliated · Estd. 2005</span>
-                </motion.div>
-
                 <motion.h1
                     className="hero-title"
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: 0.3 }}
+                    transition={{ duration: 0.6, delay: 0.2 }}
                 >
                     Rajeev Gandhi Convent
                     <br />
                     <span className="hero-gradient-text">Higher Secondary School</span>
                 </motion.h1>
+
+                <motion.div
+                    className="hero-badge"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.35 }}
+                >
+                    <Award size={16} />
+                    <span>MPBSE Affiliated · Estd. 2001</span>
+                </motion.div>
 
                 <motion.p
                     className="hero-subtitle"

@@ -1,6 +1,27 @@
-.contact-grid {
+/* Top row: Address + Map side by side */
+.contact-top-row {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 24px;
+    align-items: stretch;
+}
+
+.contact-address-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.contact-address-card .map-link {
+    margin-top: 18px;
+}
+
+/* Bottom row: Phone, Email, Timings */
+.contact-bottom-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
     gap: 22px;
 }
 
@@ -41,14 +62,54 @@
     line-height: 1.7;
 }
 
-@media (max-width: 1024px) {
-    .contact-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
+/* Google Maps embed */
+.contact-map {
+    text-align: center;
+}
+
+.map-wrapper {
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--gray-200);
+    height: 100%;
+    min-height: 300px;
+}
+
+.map-wrapper iframe {
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-height: 300px;
+}
+
+.map-link {
+    display: inline-block;
+    margin-top: 16px;
+    font-family: var(--font-accent);
+    font-size: .9rem;
+    font-weight: 600;
+    color: var(--maroon-500);
+    padding: 10px 24px;
+    border: 1.5px solid var(--maroon-200);
+    border-radius: var(--radius-full);
+    transition: var(--transition);
+}
+
+.map-link:hover {
+    background: var(--maroon-500);
+    color: white;
+    border-color: var(--maroon-500);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-maroon);
 }
 
 @media (max-width: 768px) {
-    .contact-grid {
+    .contact-top-row {
+        grid-template-columns: 1fr;
+    }
+
+    .contact-bottom-row {
         grid-template-columns: 1fr;
     }
 }
