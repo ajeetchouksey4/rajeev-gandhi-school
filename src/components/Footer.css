@@ -1,7 +1,7 @@
 .footer {
     position: relative;
     z-index: 1;
-    background: var(--gray-800);
+    background: var(--footer-bg);
     padding: 56px 0 0;
 }
 
@@ -10,7 +10,7 @@
     grid-template-columns: 2fr 1fr 1fr 1fr;
     gap: 36px;
     padding-bottom: 36px;
-    border-bottom: 1px solid rgba(255, 255, 255, .08);
+    border-bottom: 1px solid var(--footer-border);
 }
 
 .footer-logo {
@@ -21,7 +21,7 @@
     font-family: var(--font-heading);
     font-weight: 700;
     font-size: 1.1rem;
-    color: var(--white);
+    color: var(--footer-heading);
 }
 
 .footer-logo-img {
@@ -31,7 +31,7 @@
 }
 
 .footer-about p {
-    color: rgba(255, 255, 255, .5);
+    color: var(--footer-text);
     font-size: .86rem;
     line-height: 1.7;
     margin-bottom: 18px;
@@ -49,14 +49,14 @@
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    background: rgba(255, 255, 255, .06);
-    border: 1px solid rgba(255, 255, 255, .1);
-    color: rgba(255, 255, 255, .5);
+    background: var(--footer-social-bg);
+    border: 1px solid var(--footer-social-border);
+    color: var(--footer-text);
     transition: var(--transition);
 }
 
 .footer-socials a:hover {
-    background: var(--maroon-500);
+    background: var(--primary-500);
     color: white;
     border-color: transparent;
     transform: translateY(-2px);
@@ -64,7 +64,7 @@
 
 .footer-links-col h4 {
     font-family: var(--font-heading);
-    color: var(--white);
+    color: var(--footer-heading);
     font-size: .82rem;
     font-weight: 600;
     margin-bottom: 18px;
@@ -77,13 +77,13 @@
 }
 
 .footer-links-col ul li a {
-    color: rgba(255, 255, 255, .45);
+    color: var(--footer-link);
     font-size: .84rem;
     transition: var(--transition);
 }
 
 .footer-links-col ul li a:hover {
-    color: var(--maroon-200);
+    color: var(--footer-link-hover);
     padding-left: 4px;
 }
 
@@ -99,7 +99,7 @@
 }
 
 .footer-bottom strong {
-    color: var(--maroon-200);
+    color: var(--footer-link-hover);
 }
 
 @media (max-width: 900px) {

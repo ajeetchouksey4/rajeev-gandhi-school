@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { GraduationCap, Menu, X } from 'lucide-react'
 import logo from '../assets/school-logo.png'
+import ThemeSwitcher from './ThemeSwitcher'
 import './Navbar.css'
 
 const navItems = [
@@ -70,13 +71,16 @@ const Navbar = () => {
                     ))}
                 </ul>
 
-                <button
-                    className={`nav-toggle ${mobileOpen ? 'open' : ''}`}
-                    onClick={() => setMobileOpen(!mobileOpen)}
-                    aria-label="Toggle navigation"
-                >
-                    {mobileOpen ? <X size={24} /> : <Menu size={24} />}
-                </button>
+                <div className="nav-actions">
+                    <ThemeSwitcher />
+                    <button
+                        className={`nav-toggle ${mobileOpen ? 'open' : ''}`}
+                        onClick={() => setMobileOpen(!mobileOpen)}
+                        aria-label="Toggle navigation"
+                    >
+                        {mobileOpen ? <X size={24} /> : <Menu size={24} />}
+                    </button>
+                </div>
             </div>
         </nav>
     )
