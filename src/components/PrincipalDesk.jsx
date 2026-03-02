@@ -55,83 +55,90 @@ const PrincipalDesk = () => {
                         </h2>
                     </motion.div>
 
-                    <div className="pd-layout">
-                        {/* Principal Image Card */}
-                        <motion.div
-                            className="pd-image-card"
-                            initial="hidden"
-                            whileInView="visible"
-                            viewport={{ once: true, margin: '-80px' }}
-                            variants={fadeInLeft}
-                        >
-                            <div className="pd-image-wrapper">
-                                <div className="pd-image-frame">
-                                    <img
-                                        src="/principal.png"
-                                        alt="School Principal"
-                                        loading="lazy"
-                                    />
+                    <div className="pd-card-wrapper">
+                        {/* Unified Card */}
+                        <div className="pd-main-card">
+                            {/* Left — Principal Photo Area */}
+                            <motion.div
+                                className="pd-photo-section"
+                                initial="hidden"
+                                whileInView="visible"
+                                viewport={{ once: true, margin: '-80px' }}
+                                variants={fadeInLeft}
+                            >
+                                <div className="pd-photo-container">
+                                    <div className="pd-photo-frame">
+                                        <img
+                                            src="/principal.png"
+                                            alt="Deendayal Chouksey - Principal"
+                                            loading="lazy"
+                                        />
+                                    </div>
+                                    <div className="pd-photo-ring" />
+                                    <div className="pd-photo-dots" />
                                 </div>
-                                <div className="pd-image-accent" />
-                            </div>
-                            <div className="pd-name-plate">
-                                <h3 className="pd-name">Principal Name</h3>
-                                <p className="pd-designation">Principal</p>
-                                <p className="pd-school-name">Rajeev Gandhi Convent Hr. Sec. School</p>
-                            </div>
-                            <div className="pd-decorative-line" />
-                        </motion.div>
 
-                        {/* Message Content - Preview */}
-                        <motion.div
-                            className="pd-message-card"
-                            initial="hidden"
-                            whileInView="visible"
-                            viewport={{ once: true, margin: '-80px' }}
-                            variants={fadeInRight}
-                        >
-                            <div className="pd-quote-icon">
-                                <Quote size={32} />
-                            </div>
+                                <div className="pd-info">
+                                    <h3 className="pd-name">Deendayal Chouksey</h3>
+                                    <div className="pd-title-badge">
+                                        <span>Principal</span>
+                                    </div>
+                                    <p className="pd-school-label">Rajeev Gandhi Convent<br />Hr. Sec. School</p>
+                                    <div className="pd-info-divider" />
+                                    <p className="pd-quote-small">"शिक्षा ही सबसे शक्तिशाली हथियार है"</p>
+                                </div>
+                            </motion.div>
 
-                            <div className="pd-message-content">
-                                <p className="pd-message-text">
-                                    शिक्षा पाठ्यपुस्तकों तक ही सीमित नहीं है; यह चरित्र निर्माण और मूल्यों के विकास की यात्रा है जो जीवन में हमारा मार्गदर्शन करती है। ज्ञान हमें सशक्त बनाता है, लेकिन मूल्य दिशा प्रदान करते हैं। इनके बिना, सबसे प्रतिभाशाली बुद्धि भी लड़खड़ा सकती है।
-                                </p>
+                            {/* Right — Message Area */}
+                            <motion.div
+                                className="pd-message-section"
+                                initial="hidden"
+                                whileInView="visible"
+                                viewport={{ once: true, margin: '-80px' }}
+                                variants={fadeInRight}
+                            >
+                                <div className="pd-msg-quote-icon">
+                                    <Quote size={28} />
+                                </div>
 
-                                <p className="pd-message-text">
-                                    हमारे महाकाव्य हमें इस शाश्वत सत्य की याद दिलाते हैं। रामायण में मर्यादा पुरूषोत्तम के रूप में पूजनीय भगवान राम ने सत्य और कर्तव्य को व्यक्तिगत आराम से ऊपर रखा। एक कालजयी श्लोक सिखाता है:
-                                </p>
-
-                                <blockquote className="pd-shlok">
-                                    <p className="pd-shlok-text">
-                                        "सत्यं ब्रूयात् प्रियं ब्रूयात्, न ब्रूयात् सत्यमप्रियम्।"
+                                <div className="pd-msg-body">
+                                    <p className="pd-msg-text">
+                                        शिक्षा पाठ्यपुस्तकों तक ही सीमित नहीं है; यह चरित्र निर्माण और मूल्यों के विकास की यात्रा है जो जीवन में हमारा मार्गदर्शन करती है। ज्ञान हमें सशक्त बनाता है, लेकिन मूल्य दिशा प्रदान करते हैं। इनके बिना, सबसे प्रतिभाशाली बुद्धि भी लड़खड़ा सकती है।
                                     </p>
-                                    <p className="pd-shlok-text">
-                                        प्रियं च नानृतं ब्रुयात्, एष धर्मः सनातनः॥"
-                                    </p>
-                                    <p className="pd-shlok-translation">
-                                        (सत्य को सुखद ढंग से बोलें; कभी भी दुखद सत्य न बोलें, और कभी भी मीठा झूठ न बोलें। यह शाश्वत कर्तव्य है।)
-                                    </p>
-                                </blockquote>
-                            </div>
 
-                            <div className="pd-read-more-wrapper">
-                                <button
-                                    className="pd-read-more-btn"
-                                    onClick={() => setIsModalOpen(true)}
-                                >
-                                    <BookOpen size={18} />
-                                    <span>Read Full Message</span>
-                                    <div className="pd-btn-shimmer" />
-                                </button>
-                            </div>
+                                    <p className="pd-msg-text">
+                                        हमारे महाकाव्य हमें इस शाश्वत सत्य की याद दिलाते हैं। रामायण में मर्यादा पुरूषोत्तम के रूप में पूजनीय भगवान राम ने सत्य और कर्तव्य को व्यक्तिगत आराम से ऊपर रखा। एक कालजयी श्लोक सिखाता है:
+                                    </p>
 
-                            <div className="pd-signature">
-                                <div className="pd-signature-line" />
-                                <span>— Principal, Rajeev Gandhi Convent Hr. Sec. School</span>
-                            </div>
-                        </motion.div>
+                                    <blockquote className="pd-shlok">
+                                        <p className="pd-shlok-text">
+                                            "सत्यं ब्रूयात् प्रियं ब्रूयात्, न ब्रूयात् सत्यमप्रियम्।"
+                                        </p>
+                                        <p className="pd-shlok-text">
+                                            प्रियं च नानृतं ब्रुयात्, एष धर्मः सनातनः॥"
+                                        </p>
+                                        <p className="pd-shlok-translation">
+                                            (सत्य को सुखद ढंग से बोलें; कभी भी दुखद सत्य न बोलें, और कभी भी मीठा झूठ न बोलें। यह शाश्वत कर्तव्य है।)
+                                        </p>
+                                    </blockquote>
+                                </div>
+
+                                <div className="pd-msg-footer">
+                                    <button
+                                        className="pd-read-btn"
+                                        onClick={() => setIsModalOpen(true)}
+                                    >
+                                        <BookOpen size={17} />
+                                        <span>Read Full Message</span>
+                                        <div className="pd-btn-shimmer" />
+                                    </button>
+                                    <div className="pd-msg-signature">
+                                        <span className="pd-sig-dash" />
+                                        <span className="pd-sig-text">Deendayal Chouksey</span>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -159,11 +166,11 @@ const PrincipalDesk = () => {
                             <div className="pd-modal-header">
                                 <div className="pd-modal-header-left">
                                     <div className="pd-modal-avatar">
-                                        <img src="/principal.png" alt="Principal" />
+                                        <img src="/principal.png" alt="Deendayal Chouksey" />
                                     </div>
                                     <div>
-                                        <h3 className="pd-modal-title">Principal's Message</h3>
-                                        <p className="pd-modal-subtitle">Rajeev Gandhi Convent Hr. Sec. School</p>
+                                        <h3 className="pd-modal-title">Deendayal Chouksey</h3>
+                                        <p className="pd-modal-subtitle">Principal · Rajeev Gandhi Convent Hr. Sec. School</p>
                                     </div>
                                 </div>
                                 <button
@@ -245,7 +252,7 @@ const PrincipalDesk = () => {
 
                                 <div className="pd-modal-signature">
                                     <div className="pd-modal-sig-line" />
-                                    <p className="pd-modal-sig-name">Principal Name</p>
+                                    <p className="pd-modal-sig-name">Deendayal Chouksey</p>
                                     <p className="pd-modal-sig-title">Principal</p>
                                     <p className="pd-modal-sig-school">Rajeev Gandhi Convent Hr. Sec. School</p>
                                 </div>

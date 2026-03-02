@@ -7,13 +7,13 @@
     overflow: hidden;
 }
 
-/* --- Decorative Background Pattern --- */
+/* --- Decorative Background --- */
 .pd-pattern-bg {
     position: absolute;
     inset: 0;
     background-image:
-        radial-gradient(circle at 20% 50%, var(--primary-50) 0%, transparent 50%),
-        radial-gradient(circle at 80% 20%, var(--gold-100) 0%, transparent 40%);
+        radial-gradient(circle at 15% 50%, var(--primary-50) 0%, transparent 50%),
+        radial-gradient(circle at 85% 20%, var(--gold-100) 0%, transparent 40%);
     opacity: 0.6;
     pointer-events: none;
 }
@@ -57,90 +57,110 @@
     }
 }
 
-/* --- Layout --- */
-.pd-layout {
-    display: grid;
-    grid-template-columns: 340px 1fr;
-    gap: 48px;
-    align-items: start;
+/* ============================================
+   UNIFIED MAIN CARD
+   ============================================ */
+.pd-card-wrapper {
     position: relative;
     z-index: 1;
 }
 
-/* ============================================
-   PRINCIPAL IMAGE CARD
-   ============================================ */
-.pd-image-card {
-    position: sticky;
-    top: 120px;
-    text-align: center;
+.pd-main-card {
+    display: grid;
+    grid-template-columns: 1fr 1.15fr;
     background: var(--white);
     border-radius: var(--radius-xl);
-    padding: 32px 28px 28px;
     border: 1px solid var(--border);
     box-shadow: var(--shadow-lg);
+    overflow: hidden;
     transition: var(--transition);
 }
 
-.pd-image-card:hover {
-    transform: translateY(-4px);
+.pd-main-card:hover {
     box-shadow: var(--shadow-xl);
     border-color: var(--primary-100);
 }
 
-.pd-image-wrapper {
+/* ============================================
+   LEFT — PHOTO SECTION
+   ============================================ */
+.pd-photo-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 36px;
+    background: linear-gradient(160deg,
+            var(--primary-50) 0%,
+            var(--white) 40%,
+            var(--gold-100) 100%);
+    border-right: 1px solid var(--border-light);
     position: relative;
-    display: inline-block;
-    margin-bottom: 20px;
 }
 
-.pd-image-frame {
-    width: 200px;
-    height: 200px;
+.pd-photo-section::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(to bottom, var(--primary-500), var(--gold-500), var(--primary-500));
+    opacity: 0.4;
+}
+
+/* Photo Container */
+.pd-photo-container {
+    position: relative;
+    margin-bottom: 28px;
+}
+
+.pd-photo-frame {
+    width: 220px;
+    height: 220px;
     border-radius: 50%;
     overflow: hidden;
-    border: 4px solid var(--primary-500);
+    border: 5px solid var(--primary-500);
     box-shadow:
-        0 0 0 6px var(--primary-50),
-        0 0 0 8px var(--primary-100),
-        var(--shadow-primary);
-    margin: 0 auto;
+        0 0 0 8px var(--primary-50),
+        0 0 0 10px var(--primary-100),
+        0 8px 32px rgba(0, 0, 0, 0.12);
     position: relative;
     z-index: 2;
     transition: var(--transition);
 }
 
-.pd-image-card:hover .pd-image-frame {
-    border-color: var(--primary-400);
+.pd-main-card:hover .pd-photo-frame {
     box-shadow:
-        0 0 0 6px var(--primary-50),
-        0 0 0 8px var(--primary-200),
-        0 8px 32px rgba(155, 27, 48, 0.2);
+        0 0 0 8px var(--primary-50),
+        0 0 0 10px var(--primary-200),
+        0 12px 40px rgba(0, 0, 0, 0.15);
 }
 
-.pd-image-frame img {
+.pd-photo-frame img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     transition: var(--transition-slow);
 }
 
-.pd-image-card:hover .pd-image-frame img {
+.pd-main-card:hover .pd-photo-frame img {
     transform: scale(1.05);
 }
 
-.pd-image-accent {
+/* Animated ring */
+.pd-photo-ring {
     position: absolute;
-    width: 220px;
-    height: 220px;
+    width: 252px;
+    height: 252px;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%) rotate(45deg);
+    transform: translate(-50%, -50%);
     border: 2px dashed var(--primary-200);
     border-radius: 50%;
-    opacity: 0.5;
+    opacity: 0.4;
     z-index: 1;
-    animation: pd-rotate 20s linear infinite;
+    animation: pd-rotate 25s linear infinite;
 }
 
 @keyframes pd-rotate {
@@ -153,59 +173,87 @@
     }
 }
 
-.pd-name-plate {
-    margin-top: 4px;
+/* Decorative dots */
+.pd-photo-dots {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    bottom: -8px;
+    right: -8px;
+    background-image: radial-gradient(circle, var(--primary-200) 1.5px, transparent 1.5px);
+    background-size: 10px 10px;
+    opacity: 0.5;
+    z-index: 0;
+}
+
+/* Principal Info */
+.pd-info {
+    text-align: center;
 }
 
 .pd-name {
     font-family: var(--font-heading);
-    font-size: 1.35rem;
+    font-size: 1.6rem;
     font-weight: 700;
     color: var(--text-primary);
-    margin-bottom: 4px;
+    margin-bottom: 10px;
     line-height: 1.3;
 }
 
-.pd-designation {
+.pd-title-badge {
+    display: inline-flex;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.pd-title-badge span {
+    padding: 5px 22px;
+    background: linear-gradient(135deg, var(--primary-500), var(--primary-400));
+    color: white;
     font-family: var(--font-accent);
-    font-size: 0.82rem;
-    font-weight: 600;
-    color: var(--primary-500);
+    font-size: 0.72rem;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 2.5px;
-    margin-bottom: 6px;
+    letter-spacing: 3px;
+    border-radius: var(--radius-full);
+    box-shadow: var(--shadow-primary);
 }
 
-.pd-school-name {
+.pd-school-label {
     font-family: var(--font-body);
-    font-size: 0.78rem;
+    font-size: 0.82rem;
     color: var(--text-muted);
-    line-height: 1.4;
+    line-height: 1.5;
+    margin-bottom: 16px;
 }
 
-.pd-decorative-line {
-    width: 60px;
-    height: 3px;
-    margin: 18px auto 0;
-    background: linear-gradient(90deg, var(--primary-500), var(--gold-500));
-    border-radius: 2px;
+.pd-info-divider {
+    width: 50px;
+    height: 2px;
+    margin: 0 auto 14px;
+    background: linear-gradient(90deg, transparent, var(--primary-300), transparent);
+}
+
+.pd-quote-small {
+    font-family: var(--font-heading);
+    font-size: 0.85rem;
+    font-style: italic;
+    color: var(--primary-500);
+    opacity: 0.7;
+    line-height: 1.5;
 }
 
 /* ============================================
-   MESSAGE CARD
+   RIGHT — MESSAGE SECTION
    ============================================ */
-.pd-message-card {
+.pd-message-section {
+    display: flex;
+    flex-direction: column;
+    padding: 44px 40px 36px;
     position: relative;
-    background: var(--white);
-    border-radius: var(--radius-xl);
-    padding: 48px 44px 36px;
-    border: 1px solid var(--border);
-    box-shadow: var(--shadow-md);
-    transition: var(--transition);
-    overflow: hidden;
 }
 
-.pd-message-card::before {
+.pd-message-section::before {
     content: '';
     position: absolute;
     top: 0;
@@ -232,64 +280,58 @@
     }
 }
 
-.pd-message-card:hover {
-    box-shadow: var(--shadow-lg);
-    border-color: var(--primary-100);
-}
-
-/* Quote icon */
-.pd-quote-icon {
+/* Quote Icon */
+.pd-msg-quote-icon {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 56px;
-    height: 56px;
+    width: 50px;
+    height: 50px;
     background: linear-gradient(135deg, var(--primary-500), var(--primary-400));
     border-radius: var(--radius-md);
     color: white;
-    margin-bottom: 24px;
+    margin-bottom: 22px;
     box-shadow: var(--shadow-primary);
     transform: rotate(-5deg);
     transition: var(--transition);
 }
 
-.pd-message-card:hover .pd-quote-icon {
+.pd-main-card:hover .pd-msg-quote-icon {
     transform: rotate(0deg) scale(1.05);
 }
 
-/* Message text */
-.pd-message-content {
-    margin-bottom: 24px;
+/* Message Body */
+.pd-msg-body {
+    flex: 1;
 }
 
-.pd-message-text {
+.pd-msg-text {
     font-family: var(--font-body);
-    font-size: 1.02rem;
+    font-size: 0.98rem;
     line-height: 2;
     color: var(--text-body);
-    margin-bottom: 18px;
+    margin-bottom: 14px;
     text-align: justify;
-    position: relative;
 }
 
-.pd-message-text:first-child::first-letter {
+.pd-msg-text:first-child::first-letter {
     font-family: var(--font-heading);
-    font-size: 3.2rem;
+    font-size: 3rem;
     font-weight: 800;
     color: var(--primary-500);
     float: left;
     line-height: 0.8;
-    margin-right: 10px;
+    margin-right: 8px;
     margin-top: 8px;
 }
 
-/* Shlok / Sanskrit Quote */
+/* Shlok */
 .pd-shlok {
     position: relative;
-    margin: 28px 0;
-    padding: 28px 32px;
+    margin: 22px 0;
+    padding: 22px 26px;
     background: linear-gradient(135deg, var(--primary-50), var(--gold-100));
-    border-radius: var(--radius-lg);
+    border-radius: var(--radius-md);
     border-left: 4px solid var(--primary-500);
     text-align: center;
 }
@@ -297,9 +339,9 @@
 .pd-shlok::before {
     content: '॥';
     position: absolute;
-    top: 12px;
-    right: 20px;
-    font-size: 2rem;
+    top: 8px;
+    right: 16px;
+    font-size: 1.6rem;
     color: var(--primary-200);
     font-family: var(--font-heading);
     opacity: 0.6;
@@ -308,9 +350,9 @@
 .pd-shlok::after {
     content: '॥';
     position: absolute;
-    bottom: 12px;
-    left: 20px;
-    font-size: 2rem;
+    bottom: 8px;
+    left: 16px;
+    font-size: 1.6rem;
     color: var(--primary-200);
     font-family: var(--font-heading);
     opacity: 0.6;
@@ -318,7 +360,7 @@
 
 .pd-shlok-text {
     font-family: var(--font-heading);
-    font-size: 1.12rem;
+    font-size: 1.05rem;
     font-weight: 600;
     color: var(--primary-800);
     line-height: 1.9;
@@ -328,30 +370,33 @@
 
 .pd-shlok-translation {
     font-family: var(--font-body);
-    font-size: 0.88rem;
+    font-size: 0.82rem;
     color: var(--text-muted);
     font-style: italic;
-    margin-top: 14px;
-    line-height: 1.7;
+    margin-top: 10px;
+    line-height: 1.6;
 }
 
-/* ============================================
-   READ MORE BUTTON
-   ============================================ */
-.pd-read-more-wrapper {
+/* Message Footer */
+.pd-msg-footer {
     display: flex;
-    justify-content: center;
-    margin: 28px 0 24px;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-light);
+    gap: 16px;
 }
 
-.pd-read-more-btn {
+/* Read Button */
+.pd-read-btn {
     position: relative;
     display: inline-flex;
     align-items: center;
-    gap: 10px;
-    padding: 14px 32px;
+    gap: 9px;
+    padding: 12px 26px;
     font-family: var(--font-accent);
-    font-size: 0.92rem;
+    font-size: 0.88rem;
     font-weight: 600;
     color: white;
     background: linear-gradient(135deg, var(--primary-500), var(--primary-400));
@@ -361,16 +406,13 @@
     box-shadow: var(--shadow-primary);
     transition: var(--transition);
     overflow: hidden;
+    white-space: nowrap;
 }
 
-.pd-read-more-btn:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 28px rgba(155, 27, 48, 0.25);
+.pd-read-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(155, 27, 48, 0.22);
     background: linear-gradient(135deg, var(--primary-600), var(--primary-500));
-}
-
-.pd-read-more-btn:active {
-    transform: translateY(-1px);
 }
 
 .pd-btn-shimmer {
@@ -398,22 +440,22 @@
 }
 
 /* Signature */
-.pd-signature {
+.pd-msg-signature {
     display: flex;
     align-items: center;
-    gap: 14px;
-    justify-content: flex-end;
+    gap: 10px;
 }
 
-.pd-signature-line {
-    width: 50px;
+.pd-sig-dash {
+    display: block;
+    width: 32px;
     height: 2px;
     background: linear-gradient(90deg, transparent, var(--primary-300));
 }
 
-.pd-signature span {
-    font-family: var(--font-accent);
-    font-size: 0.85rem;
+.pd-sig-text {
+    font-family: var(--font-heading);
+    font-size: 0.88rem;
     font-weight: 600;
     color: var(--primary-500);
     font-style: italic;
@@ -449,7 +491,6 @@
     border: 1px solid var(--border);
 }
 
-/* Modal Header */
 .pd-modal-header {
     display: flex;
     align-items: center;
@@ -516,7 +557,6 @@
     transform: rotate(90deg);
 }
 
-/* Modal Body */
 .pd-modal-body {
     padding: 36px 36px 32px;
     overflow-y: auto;
@@ -562,7 +602,6 @@
     color: var(--text-secondary);
 }
 
-/* Modal Shlok */
 .pd-modal-shlok {
     position: relative;
     margin: 24px 0;
@@ -606,7 +645,6 @@
     line-height: 1.7;
 }
 
-/* Modal Signature */
 .pd-modal-signature {
     margin-top: 32px;
     padding-top: 24px;
@@ -650,58 +688,73 @@
    RESPONSIVE
    ============================================ */
 @media (max-width: 1024px) {
-    .pd-layout {
-        grid-template-columns: 280px 1fr;
-        gap: 32px;
+    .pd-main-card {
+        grid-template-columns: 1fr 1.25fr;
     }
 
-    .pd-message-card {
+    .pd-photo-section {
+        padding: 36px 28px;
+    }
+
+    .pd-message-section {
         padding: 36px 32px 28px;
     }
 
-    .pd-image-frame {
-        width: 170px;
-        height: 170px;
-    }
-
-    .pd-image-accent {
-        width: 190px;
-        height: 190px;
-    }
-}
-
-@media (max-width: 768px) {
-    .pd-layout {
-        grid-template-columns: 1fr;
-        gap: 28px;
-    }
-
-    .pd-image-card {
-        position: static;
-        max-width: 320px;
-        margin: 0 auto;
-    }
-
-    .pd-image-frame {
-        width: 160px;
-        height: 160px;
-    }
-
-    .pd-image-accent {
+    .pd-photo-frame {
         width: 180px;
         height: 180px;
     }
 
-    .pd-message-card {
-        padding: 28px 22px 24px;
+    .pd-photo-ring {
+        width: 212px;
+        height: 212px;
+    }
+
+    .pd-name {
+        font-size: 1.4rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .pd-main-card {
+        grid-template-columns: 1fr;
+    }
+
+    .pd-photo-section {
+        padding: 36px 28px 32px;
+        border-right: none;
+        border-bottom: 1px solid var(--border-light);
+    }
+
+    .pd-photo-section::after {
+        display: none;
+    }
+
+    .pd-photo-frame {
+        width: 160px;
+        height: 160px;
+    }
+
+    .pd-photo-ring {
+        width: 190px;
+        height: 190px;
+    }
+
+    .pd-message-section {
+        padding: 28px 24px 24px;
+    }
+
+    .pd-msg-footer {
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .pd-msg-text:first-child::first-letter {
+        font-size: 2.4rem;
     }
 
     .pd-shlok {
-        padding: 22px 20px;
-    }
-
-    .pd-message-text:first-child::first-letter {
-        font-size: 2.6rem;
+        padding: 18px 18px;
     }
 
     .pd-ornament-1 {
@@ -747,25 +800,45 @@
 }
 
 @media (max-width: 480px) {
-    .pd-message-card {
+    .pd-photo-section {
+        padding: 28px 20px 24px;
+    }
+
+    .pd-photo-frame {
+        width: 140px;
+        height: 140px;
+    }
+
+    .pd-photo-ring {
+        width: 168px;
+        height: 168px;
+    }
+
+    .pd-name {
+        font-size: 1.2rem;
+    }
+
+    .pd-message-section {
         padding: 24px 18px 20px;
     }
 
     .pd-shlok {
-        padding: 18px 16px;
+        padding: 16px 14px;
     }
 
     .pd-shlok-text {
-        font-size: 1rem;
+        font-size: 0.96rem;
     }
 
-    .pd-message-text {
-        font-size: 0.95rem;
+    .pd-msg-text {
+        font-size: 0.92rem;
     }
 
-    .pd-read-more-btn {
-        padding: 12px 24px;
-        font-size: 0.85rem;
+    .pd-read-btn {
+        padding: 11px 22px;
+        font-size: 0.82rem;
+        width: 100%;
+        justify-content: center;
     }
 
     .pd-modal-body {
