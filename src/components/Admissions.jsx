@@ -27,14 +27,40 @@ const fadeInUp = {
 const Admissions = () => {
     const [submitted, setSubmitted] = useState(false)
     const [loading, setLoading] = useState(false)
+    const [error, setError] = useState('')
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault()
         setLoading(true)
-        setTimeout(() => {
-            setLoading(false)
+        setError('')
+
+        const form = e.target
+        const enquiryData = {
+            studentName: form.studentName.value,
+            classApplyingFor: form.classFor.value,
+            parentPhone: form.parentPhone.value,
+            parentEmail: form.parentEmail.value || '',
+            message: form.message.value || '',
+        }
+
+        try {
+            const response = await fetch('http://localhost:8080/api/enquiries', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(enquiryData),
+            })
+
+            if (!response.ok) {
+                throw new Error('Failed to submit enquiry')
+            }
+
             setSubmitted(true)
-        }, 1500)
+        } catch (err) {
+            setError('Something went wrong. Please try again later.')
+            console.error('Enquiry submission error:', err)
+        } finally {
+            setLoading(false)
+        }
     }
 
     return (
@@ -98,12 +124,12 @@ const Admissions = () => {
                                 <form onSubmit={handleSubmit}>
                                     <div className="form-group">
                                         <label htmlFor="studentName">Student's Name</label>
-                                        <input type="text" id="studentName" placeholder="Enter student's full name" required />
+                                        <input type="text" id="studentName" name="studentName" placeholder="Enter student's full name" required />
                                     </div>
                                     <div className="form-row">
                                         <div className="form-group">
                                             <label htmlFor="classFor">Class Applying For</label>
-                                            <select id="classFor" required>
+                                            <select id="classFor" name="classFor" required>
                                                 <option value="">Select Class</option>
                                                 {classOptions.map((c) => (
                                                     <option key={c} value={c}>{c}</option>
@@ -112,17 +138,18 @@ const Admissions = () => {
                                         </div>
                                         <div className="form-group">
                                             <label htmlFor="parentPhone">Parent's Phone</label>
-                                            <input type="tel" id="parentPhone" placeholder="10-digit mobile" required />
+                                            <input type="tel" id="parentPhone" name="parentPhone" placeholder="10-digit mobile" required />
                                         </div>
                                     </div>
                                     <div className="form-group">
                                         <label htmlFor="parentEmail">Email Address</label>
-                                        <input type="email" id="parentEmail" placeholder="your@email.com" />
+                                        <input type="email" id="parentEmail" name="parentEmail" placeholder="your@email.com" />
                                     </div>
                                     <div className="form-group">
                                         <label htmlFor="message">Message (optional)</label>
-                                        <textarea id="message" rows="3" placeholder="Any questions or comments?"></textarea>
+                                        <textarea id="message" name="message" rows="3" placeholder="Any questions or comments?"></textarea>
                                     </div>
+                                    {error && <p style={{ color: '#ff6b6b', fontSize: '0.9rem', marginBottom: '0.5rem' }}>{error}</p>}
                                     <button type="submit" className="btn btn-primary btn-full" disabled={loading}>
                                         {loading ? (
                                             <span className="btn-loader" />
