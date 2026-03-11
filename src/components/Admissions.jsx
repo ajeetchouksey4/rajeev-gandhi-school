@@ -44,7 +44,7 @@ const Admissions = () => {
         }
 
         try {
-            const response = await fetch('http://localhost:8080/api/enquiries', {
+            const response = await fetch('https://rajeev-gandhi-school-backend-production.up.railway.app/api/enquiries', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(enquiryData),
