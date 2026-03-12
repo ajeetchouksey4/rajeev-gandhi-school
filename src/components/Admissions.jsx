@@ -25,6 +25,8 @@ const fadeInUp = {
     visible: (i = 0) => ({ opacity: 1, y: 0, transition: { duration: 0.5, delay: i * 0.1 } }),
 }
 
+const SCHOOL_WHATSAPP = '919993112923' // +91 9993112923
+
 const Admissions = () => {
     const [submitted, setSubmitted] = useState(false)
     const [loading, setLoading] = useState(false)
@@ -47,6 +49,20 @@ const Admissions = () => {
         try {
             await api.post('/enquiries', enquiryData)
             setSubmitted(true)
+
+            // Build WhatsApp message with all form details
+            const whatsappMessage = [
+                `📋 *New Enquiry*`,
+                ``,
+                `👤 *Student Name:* ${enquiryData.studentName}`,
+                `🎓 *Class Applying For:* ${enquiryData.classApplyingFor}`,
+                `📞 *Parent Phone:* ${enquiryData.parentPhone}`,
+                enquiryData.parentEmail ? `📧 *Email:* ${enquiryData.parentEmail}` : '',
+                enquiryData.message ? `💬 *Message:* ${enquiryData.message}` : '',
+            ].filter(Boolean).join('\n')
+
+            const whatsappUrl = `https://wa.me/${SCHOOL_WHATSAPP}?text=${encodeURIComponent(whatsappMessage)}`
+            window.open(whatsappUrl, '_blank')
         } catch (err) {
             setError('Something went wrong. Please try again later.')
             console.error('Enquiry submission error:', err)
