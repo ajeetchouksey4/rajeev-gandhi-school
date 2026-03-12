@@ -52,13 +52,13 @@ const Admissions = () => {
 
             // Build WhatsApp message with all form details
             const whatsappMessage = [
-                `📋 *New Enquiry*`,
+                `*New Enquiry*`,
                 ``,
-                `👤 *Student Name:* ${enquiryData.studentName}`,
-                `🎓 *Class Applying For:* ${enquiryData.classApplyingFor}`,
-                `📞 *Parent Phone:* ${enquiryData.parentPhone}`,
-                enquiryData.parentEmail ? `📧 *Email:* ${enquiryData.parentEmail}` : '',
-                enquiryData.message ? `💬 *Message:* ${enquiryData.message}` : '',
+                `*Student Name:* ${enquiryData.studentName}`,
+                `*Class Applying For:* ${enquiryData.classApplyingFor}`,
+                `*Parent Phone:* ${enquiryData.parentPhone}`,
+                enquiryData.parentEmail ? `*Email:* ${enquiryData.parentEmail}` : '',
+                enquiryData.message ? `*Message:* ${enquiryData.message}` : '',
             ].filter(Boolean).join('\n')
 
             const whatsappUrl = `https://wa.me/${SCHOOL_WHATSAPP}?text=${encodeURIComponent(whatsappMessage)}`
