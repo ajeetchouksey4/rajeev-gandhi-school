@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Send, CheckCircle, Rocket } from 'lucide-react'
+import api from '../api/api'
 import './Admissions.css'
 
 const classOptions = [
@@ -44,16 +45,7 @@ const Admissions = () => {
         }
 
         try {
-            const response = await fetch('https://rajeev-gandhi-school-backend-production.up.railway.app/api/enquiries', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(enquiryData),
-            })
-
-            if (!response.ok) {
-                throw new Error('Failed to submit enquiry')
-            }
-
+            await api.post('/enquiries', enquiryData)
             setSubmitted(true)
         } catch (err) {
             setError('Something went wrong. Please try again later.')
