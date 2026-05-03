@@ -47,7 +47,7 @@ const Admissions = () => {
         }
 
         try {
-            await api.post('/enquiries', enquiryData)
+            // await api.post('/enquiries', enquiryData)
             setSubmitted(true)
 
             // Build WhatsApp message with all form details
