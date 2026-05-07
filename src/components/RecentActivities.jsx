@@ -5,25 +5,25 @@ import './RecentActivities.css'
 
 const activities = [
     {
-        src: 'https://images.unsplash.com/photo-1577896851231-70ef18881754?w=1200&q=80',
+        src: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778142942/trophy1_bz0ht0.jpg',
         title: 'Annual Day Celebration 2026',
         date: 'February 2026',
         desc: 'Students showcased their talents through dance, drama, and music performances.',
     },
     {
-        src: 'https://images.unsplash.com/photo-1540479859555-17af45c78602?w=1200&q=80',
+        src: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778142942/trophy3_vrtlrd.jpg',
         title: 'Sports Day Championship',
         date: 'January 2026',
         desc: 'Inter-house sports competition featuring athletics, cricket, and kabaddi.',
     },
     {
-        src: 'https://images.unsplash.com/photo-1588072432836-e10032774350?w=1200&q=80',
+        src: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778130550/lab_sdvj0y.jpg',
         title: 'Science Exhibition',
         date: 'December 2025',
         desc: 'Innovative science projects and working models displayed by students.',
     },
     {
-        src: 'https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?w=1200&q=80',
+        src: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778130962/independence5_ku7v2n.jpg',
         title: 'Republic Day Parade',
         date: 'January 2026',
         desc: 'Patriotic celebrations with flag hoisting, march past, and cultural programs.',
