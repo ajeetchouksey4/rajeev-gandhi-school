@@ -50,7 +50,7 @@ const About = () => {
                             variants={fadeInUp}
                         >
                             <img
-                                src="https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=700&q=80"
+                                src="https://res.cloudinary.com/dzckejmbq/image/upload/v1778130550/picnic_tvdsge.jpg"
                                 alt="School campus"
                                 loading="lazy"
                             />
