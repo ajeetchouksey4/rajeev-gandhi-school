@@ -5,11 +5,11 @@ import './Facilities.css'
 
 const facilities = [
     { icon: Monitor, title: 'Smart Classrooms', img: 'https://images.unsplash.com/photo-1562774053-701939374585?w=500&q=80', desc: 'Interactive digital boards and projectors for engaging visual learning.' },
-    { icon: FlaskConical, title: 'Science Labs', img: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=500&q=80', desc: 'Well-equipped Physics, Chemistry & Biology labs for hands-on experiments.' },
+    { icon: FlaskConical, title: 'Science Labs', img: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778130550/lab_sdvj0y.jpg', desc: 'Well-equipped Physics, Chemistry & Biology labs for hands-on experiments.' },
     { icon: BookMarked, title: 'Library', img: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=500&q=80', desc: 'Extensive collection of books, journals, and digital resources.' },
     { icon: Dumbbell, title: 'Sports Complex', img: 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=500&q=80', desc: 'Playground, indoor games, basketball court & athletic track.' },
     { icon: Laptop, title: 'Computer Lab', img: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=500&q=80', desc: 'Modern computer lab with latest hardware, software & internet.' },
-    { icon: Bus, title: 'Transport', img: 'https://images.unsplash.com/photo-1557862921-37829c790f19?w=500&q=80', desc: 'Safe and comfortable bus service covering all major routes.' },
+    { icon: Bus, title: 'Transport', img: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778130622/assembly1_gfu2v8.jpg', desc: 'Safe and comfortable bus service covering all major routes.' },
 ]
 
 const fadeInUp = {

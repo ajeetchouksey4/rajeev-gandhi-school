@@ -4,12 +4,12 @@ import { X } from 'lucide-react'
 import './Gallery.css'
 
 const images = [
-    { src: 'https://images.unsplash.com/photo-1523050854058-8df90110c476?w=800&q=80', label: 'Annual Day Celebration', wide: true },
+    { src: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778142942/trophy1_bz0ht0.jpg', label: 'Annual Day Celebration', wide: true },
     { src: 'https://images.unsplash.com/photo-1577896851231-70ef18881754?w=600&q=80', label: 'Classroom Learning' },
-    { src: 'https://images.unsplash.com/photo-1540479859555-17af45c78602?w=600&q=80', label: 'Sports Day' },
+    { src: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778142942/trophy3_vrtlrd.jpg', label: 'Sports Day' },
     { src: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=600&q=80', label: 'Library Activities' },
-    { src: 'https://images.unsplash.com/photo-1588072432836-e10032774350?w=800&q=80', label: 'Science Exhibition', wide: true },
-    { src: 'https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?w=600&q=80', label: 'Republic Day' },
+    { src: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778130550/lab_sdvj0y.jpg', label: 'Science Exhibition', wide: true },
+    { src: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778130962/independence5_ku7v2n.jpg', label: 'Republic Day' },
 ]
 
 const fadeInUp = {
