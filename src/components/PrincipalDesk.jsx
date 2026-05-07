@@ -69,7 +69,7 @@ const PrincipalDesk = () => {
                                 <div className="pd-photo-container">
                                     <div className="pd-photo-frame">
                                         <img
-                                            src="/principal.png"
+                                            src="https://res.cloudinary.com/dzckejmbq/image/upload/v1778144653/principaldesk_rlj3ls.png"
                                             alt="Deendayal Chouksey - Principal"
                                             loading="lazy"
                                         />
