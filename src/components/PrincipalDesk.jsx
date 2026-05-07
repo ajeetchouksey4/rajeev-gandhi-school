@@ -166,7 +166,7 @@ const PrincipalDesk = () => {
                             <div className="pd-modal-header">
                                 <div className="pd-modal-header-left">
                                     <div className="pd-modal-avatar">
-                                        <img src="/principal.png" alt="Deendayal Chouksey" />
+                                        <img src="https://res.cloudinary.com/dzckejmbq/image/upload/v1778144653/principaldesk_rlj3ls.png" alt="Deendayal Chouksey" />
                                     </div>
                                     <div>
                                         <h3 className="pd-modal-title">Deendayal Chouksey</h3>
