@@ -104,8 +104,7 @@ const Contact = () => (
                         <Mail size={24} />
                     </div>
                     <h4>Email</h4>
-                    <p>info@rgchss.edu.in</p>
-                    <p>admissions@rgchss.edu.in</p>
+                    <p>rajeevgandhischool2001@gmail.com</p>
                 </motion.div>
 
                 <motion.div
