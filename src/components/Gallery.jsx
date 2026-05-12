@@ -5,7 +5,7 @@ import './Gallery.css'
 
 const images = [
     { src: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778142942/trophy1_bz0ht0.jpg', label: 'Annual Day Celebration', wide: true },
-    { src: 'https://images.unsplash.com/photo-1577896851231-70ef18881754?w=600&q=80', label: 'Classroom Learning' },
+    { src: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778130623/assembly2_lu2rg4.jpg', label: 'Yoga Day' },
     { src: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778142942/trophy3_vrtlrd.jpg', label: 'Sports Day' },
     { src: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=600&q=80', label: 'Library Activities' },
     { src: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778130550/lab_sdvj0y.jpg', label: 'Science Exhibition', wide: true },
