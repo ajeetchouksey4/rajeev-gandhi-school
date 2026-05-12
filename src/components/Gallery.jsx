@@ -7,7 +7,7 @@ const images = [
     { src: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778142942/trophy1_bz0ht0.jpg', label: 'Annual Day Celebration', wide: true },
     { src: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778130623/assembly2_lu2rg4.jpg', label: 'Yoga Day' },
     { src: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778142942/trophy3_vrtlrd.jpg', label: 'Sports Day' },
-    { src: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=600&q=80', label: 'Library Activities' },
+    { src: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778130959/independence4_jczl1m.jpg', label: 'Independence Day' },
     { src: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778130550/lab_sdvj0y.jpg', label: 'Science Exhibition', wide: true },
     { src: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778130962/independence5_ku7v2n.jpg', label: 'Republic Day' },
 ]
