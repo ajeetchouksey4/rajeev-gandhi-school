@@ -1,7 +1,7 @@
 // Centralized API utility
 // All API calls go through this module so the base URL is defined in one place.
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api'
 
 /**
  * Generic fetch wrapper.

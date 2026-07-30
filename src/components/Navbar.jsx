@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react'
-import { GraduationCap, Menu, X } from 'lucide-react'
+import { GraduationCap, Menu, X, Lock } from 'lucide-react'
 import logo from '../assets/school-logo.png'
 import ThemeSwitcher from './ThemeSwitcher'
 import './Navbar.css'
 
 const navItems = [
     { label: 'Home', href: '#home' },
+    { label: 'Notices', href: '#announcements' },
     { label: 'About', href: '#about' },
     { label: 'Academics', href: '#academics' },
     { label: 'Facilities', href: '#facilities' },
@@ -13,7 +14,7 @@ const navItems = [
     { label: 'Contact', href: '#contact' },
 ]
 
-const Navbar = () => {
+const Navbar = ({ onOpenAdmin }) => {
     const [scrolled, setScrolled] = useState(false)
     const [mobileOpen, setMobileOpen] = useState(false)
     const [active, setActive] = useState('home')
@@ -72,6 +73,14 @@ const Navbar = () => {
                 </ul>
 
                 <div className="nav-actions">
+                    <button
+                        className="admin-nav-btn"
+                        onClick={onOpenAdmin}
+                        title="Admin Login"
+                    >
+                        <Lock size={15} />
+                        <span>Admin Login</span>
+                    </button>
                     <ThemeSwitcher />
                     <button
                         className={`nav-toggle ${mobileOpen ? 'open' : ''}`}

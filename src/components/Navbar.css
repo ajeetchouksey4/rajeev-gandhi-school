@@ -121,6 +121,31 @@
     gap: 10px;
 }
 
+.admin-nav-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    background: var(--maroon-50);
+    border: 1px solid var(--maroon-100);
+    color: var(--maroon-600);
+    font-family: var(--font-accent);
+    font-size: 0.78rem;
+    font-weight: 700;
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    transition: var(--transition);
+    white-space: nowrap;
+}
+
+.admin-nav-btn:hover {
+    background: var(--maroon-500);
+    color: var(--white);
+    border-color: var(--maroon-500);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
 .nav-toggle {
     display: none;
     background: var(--gray-100);
