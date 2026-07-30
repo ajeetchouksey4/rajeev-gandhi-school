@@ -1,6 +1,8 @@
-import React from 'react'
+import React, { useState } from 'react'
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
+import Announcements from './components/Announcements'
+import AdminPanel from './components/AdminPanel'
 import About from './components/About'
 import PrincipalDesk from './components/PrincipalDesk'
 import Academics from './components/Academics'
@@ -15,10 +17,17 @@ import BackToTop from './components/BackToTop'
 import './App.css'
 
 function App() {
+  const [isAdminOpen, setIsAdminOpen] = useState(false)
+  const [announcementsData, setAnnouncementsData] = useState([])
+
   return (
     <div className="app">
-      <Navbar />
+      <Navbar onOpenAdmin={() => setIsAdminOpen(true)} />
       <Hero />
+      <Announcements
+        externalAnnouncements={announcementsData}
+        onOpenAdmin={() => setIsAdminOpen(true)}
+      />
       <About />
       <PrincipalDesk />
       <Academics />
@@ -30,6 +39,11 @@ function App() {
       <Contact />
       <Footer />
       <BackToTop />
+      <AdminPanel
+        isOpen={isAdminOpen}
+        onClose={() => setIsAdminOpen(false)}
+        onDataChange={(data) => setAnnouncementsData(data)}
+      />
     </div>
   )
 }

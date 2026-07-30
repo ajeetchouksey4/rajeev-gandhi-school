@@ -1,0 +1,161 @@
+/* ============================================
+   ANNOUNCEMENT TICKER BAR
+   ============================================ */
+.announcement-ticker-bar {
+    background: linear-gradient(90deg, var(--primary-900) 0%, var(--primary-800) 50%, var(--primary-700) 100%);
+    color: var(--white);
+    font-size: 0.85rem;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    position: relative;
+    z-index: 1001;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.ticker-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.ticker-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--gold-500);
+    color: #1a1614;
+    font-weight: 800;
+    font-size: 0.72rem;
+    padding: 3px 10px;
+    border-radius: var(--radius-full);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.ticker-icon {
+    animation: bell-bounce 2s infinite ease-in-out;
+}
+
+@keyframes bell-bounce {
+    0%, 100% { transform: rotate(0deg); }
+    10%, 30% { transform: rotate(14deg); }
+    20%, 40% { transform: rotate(-14deg); }
+    50% { transform: rotate(0deg); }
+}
+
+.ticker-content {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    overflow: hidden;
+}
+
+.ticker-tag {
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    white-space: nowrap;
+}
+
+.tag-admissions {
+    background: rgba(45, 138, 86, 0.3);
+    color: #8edaa8;
+    border: 1px solid rgba(45, 138, 86, 0.5);
+}
+
+.tag-exams {
+    background: rgba(212, 74, 96, 0.3);
+    color: #f4cdd4;
+    border: 1px solid rgba(212, 74, 96, 0.5);
+}
+
+.tag-event {
+    background: rgba(59, 127, 196, 0.3);
+    color: #a0cdfc;
+    border: 1px solid rgba(59, 127, 196, 0.5);
+}
+
+.ticker-text {
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: rgba(255, 255, 255, 0.95);
+    font-weight: 500;
+}
+
+.ticker-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    color: var(--gold-300);
+    font-weight: 700;
+    white-space: nowrap;
+    transition: var(--transition);
+}
+
+.ticker-link:hover {
+    color: var(--white);
+    transform: translateX(2px);
+}
+
+.ticker-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    white-space: nowrap;
+}
+
+.ticker-count {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.6);
+    font-weight: 600;
+}
+
+.ticker-close-btn {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    border-radius: 50%;
+    transition: var(--transition);
+}
+
+.ticker-close-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: var(--white);
+}
+
+@media (max-width: 768px) {
+    .ticker-container {
+        gap: 8px;
+    }
+    
+    .ticker-label span {
+        display: none;
+    }
+
+    .ticker-label {
+        padding: 4px;
+    }
+    
+    .ticker-tag {
+        display: none;
+    }
+
+    .ticker-count {
+        display: none;
+    }
+}
