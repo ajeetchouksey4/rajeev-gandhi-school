@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
 import Announcements from './components/Announcements'
@@ -14,11 +14,30 @@ import Admissions from './components/Admissions'
 import Contact from './components/Contact'
 import Footer from './components/Footer'
 import BackToTop from './components/BackToTop'
+import api from './api/api'
 import './App.css'
 
 function App() {
   const [isAdminOpen, setIsAdminOpen] = useState(false)
   const [announcementsData, setAnnouncementsData] = useState([])
+
+  useEffect(() => {
+    const fetchInitialData = async () => {
+      try {
+        const res = await api.get('/announcements')
+        const data = await res.json()
+        if (Array.isArray(data)) {
+          setAnnouncementsData(data)
+        }
+      } catch (err) {
+        console.warn('Frontend initial fetch failed, loading from local storage:', err.message)
+        const saved = localStorage.getItem('rg_announcements')
+        const localData = saved ? JSON.parse(saved) : []
+        setAnnouncementsData(localData)
+      }
+    }
+    fetchInitialData()
+  }, [])
 
   return (
     <div className="app">
