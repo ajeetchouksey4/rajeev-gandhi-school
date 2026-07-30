@@ -1,7 +1,11 @@
 // Centralized API utility
 // All API calls go through this module so the base URL is defined in one place.
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api'
+const isLocal = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+
+const BASE_URL = import.meta.env.VITE_API_BASE_URL ||
+    import.meta.env.VITE_API_URL ||
+    (isLocal ? 'http://localhost:8080/api' : 'https://rajeev-gandhi-school-backend-production-4574.up.railway.app/api')
 
 /**
  * Generic fetch wrapper.
