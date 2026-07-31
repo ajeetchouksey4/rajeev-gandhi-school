@@ -40,6 +40,7 @@ const Admissions = () => {
         const form = e.target
         const enquiryData = {
             studentName: form.studentName.value,
+            parentName: form.parentName ? form.parentName.value : '',
             classApplyingFor: form.classFor.value,
             parentPhone: form.parentPhone.value,
             parentEmail: form.parentEmail.value || '',
@@ -55,6 +56,7 @@ const Admissions = () => {
                 `*New Enquiry*`,
                 ``,
                 `*Student Name:* ${enquiryData.studentName}`,
+                enquiryData.parentName ? `*Parent Name:* ${enquiryData.parentName}` : '',
                 `*Class Applying For:* ${enquiryData.classApplyingFor}`,
                 `*Parent Phone:* ${enquiryData.parentPhone}`,
                 enquiryData.parentEmail ? `*Email:* ${enquiryData.parentEmail}` : '',
@@ -130,9 +132,15 @@ const Admissions = () => {
                                     <Rocket size={20} /> Enquiry Form
                                 </h3>
                                 <form onSubmit={handleSubmit}>
-                                    <div className="form-group">
-                                        <label htmlFor="studentName">Student's Name</label>
-                                        <input type="text" id="studentName" name="studentName" placeholder="Enter student's full name" required />
+                                    <div className="form-row">
+                                        <div className="form-group">
+                                            <label htmlFor="studentName">Student's Name</label>
+                                            <input type="text" id="studentName" name="studentName" placeholder="Enter student's full name" required />
+                                        </div>
+                                        <div className="form-group">
+                                            <label htmlFor="parentName">Parent's / Guardian's Name</label>
+                                            <input type="text" id="parentName" name="parentName" placeholder="Enter parent's full name" required />
+                                        </div>
                                     </div>
                                     <div className="form-row">
                                         <div className="form-group">

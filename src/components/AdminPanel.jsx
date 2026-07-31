@@ -7,63 +7,92 @@ import {
     Edit2,
     Trash2,
     Pin,
-    Check,
     AlertCircle,
-    Server,
     Wifi,
     WifiOff,
     LogOut,
-    RefreshCw
+    RefreshCw,
+    MessageSquare,
+    BarChart2,
+    Eye,
+    Filter,
+    Search,
+    PhoneCall,
+    Mail,
+    User,
+    Calendar,
+    GraduationCap,
+    Clock,
+    Send,
+    Bell
 } from 'lucide-react'
+import {
+    ResponsiveContainer,
+    BarChart,
+    Bar,
+    XAxis,
+    YAxis,
+    Tooltip,
+    CartesianGrid
+} from 'recharts'
 import api from '../api/api'
 import './AdminPanel.css'
 
 const categories = ['Admissions', 'Exams', 'Academic', 'Events', 'Circulars']
 const badges = ['URGENT', 'IMPORTANT', 'NOTICE', 'EVENT', 'MEETING']
+const statusOptions = ['ALL', 'NEW', 'CONTACTED', 'ENROLLED', 'CLOSED']
 
-const initialMockAnnouncements = [
+const initialMockEnquiries = [
     {
-        id: 1,
-        title: 'Admissions Open for Academic Session 2026-2027',
-        category: 'Admissions',
-        date: '28 Jan 2026',
-        isPinned: true,
-        badge: 'URGENT',
-        description:
-            'Registration forms for Nursery to Class 11th are now available online and at the school office. Entrance assessment dates and syllabus guidelines will be communicated individually to registered parents.',
+        id: 101,
+        studentName: 'Aarav Sharma',
+        parentName: 'Rajesh Sharma',
+        parentPhone: '9876543210',
+        parentEmail: 'rajesh.sharma@example.com',
+        classApplyingFor: 'Class 9',
+        message: 'Looking for admission guidelines and fee structure for academic session 2026-27.',
+        status: 'NEW',
+        isRead: false,
+        createdAt: '2026-07-31T10:30:00',
     },
     {
-        id: 2,
-        title: 'MP Board Class 10th & 12th Pre-Board Exam Date Sheet',
-        category: 'Exams',
-        date: '25 Jan 2026',
-        isPinned: true,
-        badge: 'IMPORTANT',
-        description:
-            'Pre-board examinations start from 10th February 2026. Practical examinations for science streams will take place between 5th-8th Feb. Admit cards can be collected from the school administrative counter.',
+        id: 102,
+        studentName: 'Ananya Verma',
+        parentName: 'Suman Verma',
+        parentPhone: '9988776655',
+        parentEmail: 'suman.v@example.com',
+        classApplyingFor: 'Nursery',
+        message: 'Is transport facility available for South City area?',
+        status: 'CONTACTED',
+        isRead: true,
+        createdAt: '2026-07-30T14:15:00',
     },
     {
-        id: 3,
-        title: 'Revised Timing for Nursery & KG Classes during Winter Season',
-        category: 'Circulars',
-        date: '20 Jan 2026',
-        isPinned: false,
-        badge: 'NOTICE',
-        description:
-            'Due to cold wave conditions, morning timings for Nursery to UKG classes are revised to 9:00 AM – 1:30 PM until further notification. School buses will operate accordingly.',
-    },
+        id: 103,
+        studentName: 'Rohan Gupta',
+        parentName: 'Vikram Gupta',
+        parentPhone: '9123456789',
+        parentEmail: 'vikram.g@example.com',
+        classApplyingFor: 'Class 11 – Science',
+        message: 'Wants to enquire about JEE coaching along with MP Board curriculum.',
+        status: 'ENROLLED',
+        isRead: true,
+        createdAt: '2026-07-28T09:00:00',
+    }
 ]
 
 const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
     const [isAuthenticated, setIsAuthenticated] = useState(false)
     const [passcode, setPasscode] = useState('')
     const [authError, setAuthError] = useState('')
+    const [activeTab, setActiveTab] = useState('enquiries') // 'enquiries' | 'notices'
 
+    // Announcements state
     const [announcements, setAnnouncements] = useState([])
     const [isBackendConnected, setIsBackendConnected] = useState(false)
     const [loading, setLoading] = useState(false)
 
-    // Form Modal State
+    // Form Modal State for Announcements
     const [isFormOpen, setIsFormOpen] = useState(false)
     const [editingItem, setEditingItem] = useState(null)
     const [formData, setFormData] = useState({
@@ -75,7 +104,24 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
         isPinned: false,
     })
 
-    // Fetch announcements from Spring Boot backend or LocalStorage
+    // Enquiries state
+    const [enquiries, setEnquiries] = useState([])
+    const [unreadCount, setUnreadCount] = useState(0)
+    const [statusFilter, setStatusFilter] = useState('ALL')
+    const [searchQuery, setSearchQuery] = useState('')
+    const [selectedEnquiry, setSelectedEnquiry] = useState(null)
+    const [isDetailOpen, setIsDetailOpen] = useState(false)
+
+    // Analytics state
+    const [isAnalyticsOpen, setIsAnalyticsOpen] = useState(false)
+    const [analyticsRange, setAnalyticsRange] = useState('week')
+    const [analyticsData, setAnalyticsData] = useState({
+        total: 0,
+        statusBreakdown: { NEW: 0, CONTACTED: 0, ENROLLED: 0, CLOSED: 0 },
+        timeline: []
+    })
+
+    // Fetch announcements
     const fetchAnnouncements = async () => {
         setLoading(true)
         try {
@@ -89,7 +135,6 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
         } catch (err) {
             console.warn('Backend API connection failed, falling back to local data:', err.message)
             setIsBackendConnected(false)
-            // Load local storage fallback
             const saved = localStorage.getItem('rg_announcements')
             const localData = saved !== null ? JSON.parse(saved) : []
             setAnnouncements(localData)
@@ -99,13 +144,118 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
         }
     }
 
+    // Fetch enquiries
+    const fetchEnquiries = async () => {
+        setLoading(true)
+        try {
+            let endpoint = '/enquiries'
+            const params = new URLSearchParams()
+            if (statusFilter && statusFilter !== 'ALL') params.append('status', statusFilter)
+            if (searchQuery) params.append('search', searchQuery)
+            if (params.toString()) endpoint += `?${params.toString()}`
+
+            const res = await api.get(endpoint)
+            const data = await res.json()
+            if (Array.isArray(data)) {
+                setEnquiries(data)
+                setIsBackendConnected(true)
+
+                // Fetch unread count
+                try {
+                    const countRes = await api.get('/enquiries/unread-count')
+                    const countData = await countRes.json()
+                    setUnreadCount(countData.unreadCount || 0)
+                } catch (e) {
+                    const uCount = data.filter(e => !e.isRead).length
+                    setUnreadCount(uCount)
+                }
+            }
+        } catch (err) {
+            console.warn('Failed to fetch enquiries from backend, using local/mock state:', err.message)
+            setIsBackendConnected(false)
+            const saved = localStorage.getItem('rg_enquiries')
+            const localData = saved !== null ? JSON.parse(saved) : initialMockEnquiries
+            
+            // Filter local data
+            let filtered = [...localData]
+            if (statusFilter && statusFilter !== 'ALL') {
+                filtered = filtered.filter(item => item.status === statusFilter)
+            }
+            if (searchQuery) {
+                const q = searchQuery.toLowerCase()
+                filtered = filtered.filter(item => 
+                    (item.studentName && item.studentName.toLowerCase().includes(q)) ||
+                    (item.parentName && item.parentName.toLowerCase().includes(q)) ||
+                    (item.parentPhone && item.parentPhone.toLowerCase().includes(q)) ||
+                    (item.phone && item.phone.toLowerCase().includes(q))
+                )
+            }
+            setEnquiries(filtered)
+            setUnreadCount(localData.filter(e => !e.isRead).length)
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    // Fetch analytics
+    const fetchAnalytics = async (range = analyticsRange) => {
+        try {
+            const res = await api.get(`/enquiries/analytics?range=${range}`)
+            const data = await res.json()
+            setAnalyticsData(data)
+        } catch (err) {
+            // Local fallback analytics
+            const saved = localStorage.getItem('rg_enquiries')
+            const list = saved !== null ? JSON.parse(saved) : initialMockEnquiries
+            const total = list.length
+            const statusBreakdown = {
+                NEW: list.filter(e => e.status === 'NEW').length,
+                CONTACTED: list.filter(e => e.status === 'CONTACTED').length,
+                ENROLLED: list.filter(e => e.status === 'ENROLLED').length,
+                CLOSED: list.filter(e => e.status === 'CLOSED').length,
+            }
+            
+            let timeline = []
+            if (range === 'year') {
+                timeline = [
+                    { label: 'May 2026', count: 4 },
+                    { label: 'Jun 2026', count: 12 },
+                    { label: 'Jul 2026', count: total },
+                ]
+            } else if (range === 'month') {
+                timeline = [
+                    { label: 'W1 (07 Jul)', count: 2 },
+                    { label: 'W2 (14 Jul)', count: 5 },
+                    { label: 'W3 (21 Jul)', count: 8 },
+                    { label: 'W4 (28 Jul)', count: total },
+                ]
+            } else {
+                timeline = [
+                    { label: 'Mon', count: 1 },
+                    { label: 'Tue', count: 3 },
+                    { label: 'Wed', count: 2 },
+                    { label: 'Thu', count: 4 },
+                    { label: 'Fri', count: total },
+                ]
+            }
+            setAnalyticsData({ total, statusBreakdown, timeline })
+        }
+    }
+
     useEffect(() => {
         if (isOpen) {
             fetchAnnouncements()
+            fetchEnquiries()
         }
-    }, [isOpen])
+    }, [isOpen, statusFilter, searchQuery])
 
-    // Lock body scroll when admin modal is active
+    useEffect(() => {
+        if (isAnalyticsOpen) {
+            fetchAnalytics(analyticsRange)
+        }
+    }, [isAnalyticsOpen, analyticsRange])
+
+    // Lock body scroll when modal active
     useEffect(() => {
         if (isOpen) {
             document.body.style.overflow = 'hidden'
@@ -132,16 +282,19 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                 sessionStorage.setItem('rg_admin_auth', 'true')
                 setAuthError('')
                 setPasscode('')
+                fetchEnquiries()
+                fetchAnnouncements()
             } else {
                 setAuthError(data.message || 'Invalid admin password!')
             }
         } catch (err) {
-            // Fallback check if backend API is unreachable
             if (passcode === 'RajeevAdmin2026!') {
                 setIsAuthenticated(true)
                 sessionStorage.setItem('rg_admin_auth', 'true')
                 setAuthError('')
                 setPasscode('')
+                fetchEnquiries()
+                fetchAnnouncements()
             } else {
                 setAuthError('Invalid admin password or backend unreachable.')
             }
@@ -150,6 +303,68 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
         }
     }
 
+    // Enquiry Actions
+    const handleOpenDetail = async (item) => {
+        setSelectedEnquiry(item)
+        setIsDetailOpen(true)
+
+        // Mark as read
+        if (!item.isRead) {
+            if (isBackendConnected) {
+                try {
+                    await api.get(`/enquiries/${item.id}`)
+                    fetchEnquiries()
+                } catch (err) {
+                    console.error(err)
+                }
+            } else {
+                // LocalStorage update
+                const saved = localStorage.getItem('rg_enquiries')
+                const list = saved !== null ? JSON.parse(saved) : initialMockEnquiries
+                const updated = list.map(e => e.id === item.id ? { ...e, isRead: true } : e)
+                localStorage.setItem('rg_enquiries', JSON.stringify(updated))
+                setEnquiries(prev => prev.map(e => e.id === item.id ? { ...e, isRead: true } : e))
+                setUnreadCount(prev => Math.max(0, prev - 1))
+            }
+        }
+    }
+
+    const handleStatusChange = async (id, newStatus) => {
+        if (isBackendConnected) {
+            try {
+                await api.patch(`/enquiries/${id}/status`, { status: newStatus })
+                fetchEnquiries()
+                if (selectedEnquiry && selectedEnquiry.id === id) {
+                    setSelectedEnquiry(prev => ({ ...prev, status: newStatus }))
+                }
+            } catch (err) {
+                alert(`Error updating status: ${err.message}`)
+            }
+        } else {
+            const saved = localStorage.getItem('rg_enquiries')
+            const list = saved !== null ? JSON.parse(saved) : initialMockEnquiries
+            const updated = list.map(e => e.id === id ? { ...e, status: newStatus } : e)
+            localStorage.setItem('rg_enquiries', JSON.stringify(updated))
+            setEnquiries(prev => prev.map(e => e.id === id ? { ...e, status: newStatus } : e))
+            if (selectedEnquiry && selectedEnquiry.id === id) {
+                setSelectedEnquiry(prev => ({ ...prev, status: newStatus }))
+            }
+        }
+    }
+
+    const openWhatsApp = (enquiry) => {
+        const phone = (enquiry.parentPhone || enquiry.phone || '').replace(/\D/g, '')
+        const formattedPhone = phone.length === 10 ? `91${phone}` : phone
+        const parentName = enquiry.parentName || 'Parent'
+        const studentName = enquiry.studentName || 'your child'
+        const classAppliedFor = enquiry.classApplyingFor || enquiry.classAppliedFor || 'our school'
+
+        const text = `Hi ${parentName}, thank you for your enquiry about admission for ${studentName} in ${classAppliedFor}. We'd love to help — let us know a good time to talk.`
+        const url = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(text)}`
+        window.open(url, '_blank')
+    }
+
+    // Announcement Handlers
     const handleOpenForm = (item = null) => {
         if (item) {
             setEditingItem(item)
@@ -191,7 +406,6 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                 alert(`Backend Save Error: ${err.message}`)
             }
         } else {
-            // LocalStorage fallback
             let updatedList = []
             if (editingItem) {
                 updatedList = announcements.map((item) =>
@@ -268,11 +482,6 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                                 className={`backend-status-pill ${
                                     isBackendConnected ? 'connected' : 'offline'
                                 }`}
-                                title={
-                                    isBackendConnected
-                                        ? 'Connected to Spring Boot REST API'
-                                        : 'Backend offline - Changes saved to Local Browser State'
-                                }
                             >
                                 {isBackendConnected ? <Wifi size={13} /> : <WifiOff size={13} />}
                                 <span>{isBackendConnected ? 'Backend Live' : 'Offline Mode'}</span>
@@ -284,7 +493,7 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                     </div>
                 </div>
 
-                {/* Body Content */}
+                {/* Main Body */}
                 {!isAuthenticated ? (
                     /* PASSCODE LOGIN SCREEN */
                     <div className="admin-login-card">
@@ -292,7 +501,7 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                             <Lock size={28} />
                         </div>
                         <h4>Admin Portal Access</h4>
-                        <p>Enter the administrator passcode to manage notices and school updates.</p>
+                        <p>Enter the administrator passcode to access enquiries, analytics, and announcements.</p>
 
                         <form onSubmit={handleLogin} className="login-form">
                             <input
@@ -309,91 +518,390 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                         </form>
                     </div>
                 ) : (
-                    /* ADMIN DASHBOARD */
+                    /* ADMIN DASHBOARD WITH TABS */
                     <div className="admin-dashboard">
-                        {/* Toolbar */}
-                        <div className="dashboard-toolbar">
-                            <div className="toolbar-left">
-                                <h4>Announcement Manager ({announcements.length})</h4>
-                                <button className="refresh-btn" onClick={fetchAnnouncements} title="Refresh Data">
-                                    <RefreshCw size={13} className={loading ? 'spin' : ''} />
-                                </button>
-                            </div>
-                            <div className="toolbar-right">
-                                <button className="btn btn-primary btn-sm" onClick={() => handleOpenForm()}>
-                                    <Plus size={15} /> Add Notice
-                                </button>
-                                <button
-                                    className="btn-logout"
-                                    onClick={() => setIsAuthenticated(false)}
-                                    title="Logout"
-                                >
-                                    <LogOut size={15} />
-                                </button>
-                            </div>
+                        {/* Sidebar / Navigation Tabs */}
+                        <div className="admin-nav-tabs">
+                            <button
+                                className={`nav-tab-btn ${activeTab === 'enquiries' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('enquiries')}
+                            >
+                                <MessageSquare size={16} />
+                                <span>Enquiries</span>
+                                {unreadCount > 0 && (
+                                    <span className="unread-badge-chip">{unreadCount}</span>
+                                )}
+                            </button>
+
+                            <button
+                                className={`nav-tab-btn ${activeTab === 'notices' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('notices')}
+                            >
+                                <Bell size={16} />
+                                <span>Announcements</span>
+                                <span className="tab-count-chip">{announcements.length}</span>
+                            </button>
                         </div>
 
-                        {/* List Table */}
-                        <div className="admin-notices-table">
-                            {announcements.length > 0 ? (
-                                [...announcements]
-                                    .sort((a, b) => {
-                                        const pinA = a.isPinned ? 1 : 0
-                                        const pinB = b.isPinned ? 1 : 0
-                                        if (pinA !== pinB) return pinB - pinA
-                                        return (b.id || 0) - (a.id || 0)
-                                    })
-                                    .map((item) => (
-                                    <div key={item.id} className={`admin-notice-item ${item.isPinned ? 'pinned' : ''}`}>
-                                        <div className="item-main">
-                                            <div className="item-meta">
-                                                <span className={`badge-chip tag-${item.category.toLowerCase()}`}>
-                                                    {item.badge || 'NOTICE'}
-                                                </span>
-                                                <span className="item-category-label">{item.category}</span>
-                                                <span className="item-date">{item.date}</span>
-                                            </div>
-                                            <h5 className="item-title">{item.title}</h5>
-                                            <p className="item-desc-preview">{item.description}</p>
+                        {/* ENQUIRIES TAB CONTENT */}
+                        {activeTab === 'enquiries' && (
+                            <div className="tab-pane">
+                                {/* Toolbar */}
+                                <div className="dashboard-toolbar">
+                                    <div className="toolbar-left search-and-filter">
+                                        <div className="search-box">
+                                            <Search size={15} className="search-icon" />
+                                            <input
+                                                type="text"
+                                                placeholder="Search student, parent, phone..."
+                                                value={searchQuery}
+                                                onChange={(e) => setSearchQuery(e.target.value)}
+                                            />
                                         </div>
 
-                                        <div className="item-actions">
-                                            <button
-                                                className={`icon-action-btn pin-btn ${item.isPinned ? 'active' : ''}`}
-                                                onClick={() => handleTogglePin(item)}
-                                                title={item.isPinned ? 'Unpin Notice' : 'Pin to Top'}
-                                            >
-                                                <Pin size={15} />
-                                            </button>
-                                            <button
-                                                className="icon-action-btn edit-btn"
-                                                onClick={() => handleOpenForm(item)}
-                                                title="Edit Notice"
-                                            >
-                                                <Edit2 size={15} />
-                                            </button>
-                                            <button
-                                                className="icon-action-btn delete-btn"
-                                                onClick={() => handleDeleteNotice(item.id)}
-                                                title="Delete Notice"
-                                            >
-                                                <Trash2 size={15} />
-                                            </button>
-                                        </div>
+                                        <select
+                                            className="filter-select"
+                                            value={statusFilter}
+                                            onChange={(e) => setStatusFilter(e.target.value)}
+                                        >
+                                            {statusOptions.map(st => (
+                                                <option key={st} value={st}>
+                                                    {st === 'ALL' ? 'All Statuses' : st}
+                                                </option>
+                                            ))}
+                                        </select>
+
+                                        <button className="refresh-btn" onClick={fetchEnquiries} title="Refresh Enquiries">
+                                            <RefreshCw size={13} className={loading ? 'spin' : ''} />
+                                        </button>
                                     </div>
-                                ))
-                            ) : (
-                                <div className="admin-empty-state">
-                                    <AlertCircle size={30} />
-                                    <p>No announcements present. Click "+ Add Notice" to create one.</p>
+
+                                    <div className="toolbar-right">
+                                        <button
+                                            className={`btn btn-secondary btn-sm ${isAnalyticsOpen ? 'active-analytics' : ''}`}
+                                            onClick={() => setIsAnalyticsOpen(true)}
+                                        >
+                                            <BarChart2 size={15} /> Analytics
+                                        </button>
+                                        <button className="btn-logout" onClick={() => setIsAuthenticated(false)} title="Logout">
+                                            <LogOut size={15} />
+                                        </button>
+                                    </div>
                                 </div>
-                            )}
-                        </div>
+
+                                {/* Enquiry Table / Cards List */}
+                                <div className="admin-enquiries-list">
+                                    {enquiries.length > 0 ? (
+                                        enquiries.map((enq) => {
+                                            const isUnread = !enq.isRead
+                                            return (
+                                                <div
+                                                    key={enq.id}
+                                                    className={`admin-enquiry-card ${isUnread ? 'unread' : ''}`}
+                                                    onClick={() => handleOpenDetail(enq)}
+                                                >
+                                                    <div className="enquiry-card-header">
+                                                        <div className="student-info">
+                                                            {isUnread && <span className="unread-dot" title="Unread Enquiry" />}
+                                                            <h5 className={isUnread ? 'bold-text' : ''}>
+                                                                {enq.studentName}
+                                                            </h5>
+                                                            <span className="parent-subtext">
+                                                                Parent: <strong>{enq.parentName || 'Parent / Guardian'}</strong>
+                                                            </span>
+                                                        </div>
+                                                        <div className="card-right-group">
+                                                            <span className={`status-pill status-${(enq.status || 'NEW').toLowerCase()}`}>
+                                                                {enq.status || 'NEW'}
+                                                            </span>
+                                                            <button
+                                                                className="whatsapp-btn-sm"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation()
+                                                                    openWhatsApp(enq)
+                                                                }}
+                                                                title="Open WhatsApp Chat"
+                                                            >
+                                                                <Send size={13} /> WhatsApp
+                                                            </button>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="enquiry-card-details">
+                                                        <span><GraduationCap size={13} /> Class: <strong>{enq.classApplyingFor || enq.classAppliedFor}</strong></span>
+                                                        <span><PhoneCall size={13} /> {enq.parentPhone || enq.phone}</span>
+                                                        {enq.createdAt && (
+                                                            <span><Clock size={13} /> {new Date(enq.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}</span>
+                                                        )}
+                                                    </div>
+
+                                                    {enq.message && (
+                                                        <p className="enquiry-msg-snippet">{enq.message}</p>
+                                                    )}
+                                                </div>
+                                            )
+                                        })
+                                    ) : (
+                                        <div className="admin-empty-state">
+                                            <AlertCircle size={30} />
+                                            <p>No enquiries found matching your filter criteria.</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* ANNOUNCEMENTS TAB CONTENT */}
+                        {activeTab === 'notices' && (
+                            <div className="tab-pane">
+                                {/* Toolbar */}
+                                <div className="dashboard-toolbar">
+                                    <div className="toolbar-left">
+                                        <h4>Announcement Manager ({announcements.length})</h4>
+                                        <button className="refresh-btn" onClick={fetchAnnouncements} title="Refresh Data">
+                                            <RefreshCw size={13} className={loading ? 'spin' : ''} />
+                                        </button>
+                                    </div>
+                                    <div className="toolbar-right">
+                                        <button className="btn btn-primary btn-sm" onClick={() => handleOpenForm()}>
+                                            <Plus size={15} /> Add Notice
+                                        </button>
+                                        <button className="btn-logout" onClick={() => setIsAuthenticated(false)} title="Logout">
+                                            <LogOut size={15} />
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* List Table */}
+                                <div className="admin-notices-table">
+                                    {announcements.length > 0 ? (
+                                        [...announcements]
+                                            .sort((a, b) => {
+                                                const pinA = a.isPinned ? 1 : 0
+                                                const pinB = b.isPinned ? 1 : 0
+                                                if (pinA !== pinB) return pinB - pinA
+                                                return (b.id || 0) - (a.id || 0)
+                                            })
+                                            .map((item) => (
+                                                <div key={item.id} className={`admin-notice-item ${item.isPinned ? 'pinned' : ''}`}>
+                                                    <div className="item-main">
+                                                        <div className="item-meta">
+                                                            <span className={`badge-chip tag-${item.category.toLowerCase()}`}>
+                                                                {item.badge || 'NOTICE'}
+                                                            </span>
+                                                            <span className="item-category-label">{item.category}</span>
+                                                            <span className="item-date">{item.date}</span>
+                                                        </div>
+                                                        <h5 className="item-title">{item.title}</h5>
+                                                        <p className="item-desc-preview">{item.description}</p>
+                                                    </div>
+
+                                                    <div className="item-actions">
+                                                        <button
+                                                            className={`icon-action-btn pin-btn ${item.isPinned ? 'active' : ''}`}
+                                                            onClick={() => handleTogglePin(item)}
+                                                            title={item.isPinned ? 'Unpin Notice' : 'Pin to Top'}
+                                                        >
+                                                            <Pin size={15} />
+                                                        </button>
+                                                        <button
+                                                            className="icon-action-btn edit-btn"
+                                                            onClick={() => handleOpenForm(item)}
+                                                            title="Edit Notice"
+                                                        >
+                                                            <Edit2 size={15} />
+                                                        </button>
+                                                        <button
+                                                            className="icon-action-btn delete-btn"
+                                                            onClick={() => handleDeleteNotice(item.id)}
+                                                            title="Delete Notice"
+                                                        >
+                                                            <Trash2 size={15} />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ))
+                                    ) : (
+                                        <div className="admin-empty-state">
+                                            <AlertCircle size={30} />
+                                            <p>No announcements present. Click "+ Add Notice" to create one.</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
                     </div>
                 )}
             </motion.div>
 
-            {/* Form Modal for Add/Edit */}
+            {/* ENQUIRY DETAIL MODAL */}
+            <AnimatePresence>
+                {isDetailOpen && selectedEnquiry && (
+                    <div className="form-modal-backdrop" onClick={() => setIsDetailOpen(false)}>
+                        <motion.div
+                            className="form-modal-card enquiry-detail-modal"
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="form-modal-header">
+                                <div className="detail-title-group">
+                                    <h4>Enquiry Details</h4>
+                                    <span className={`status-pill status-${(selectedEnquiry.status || 'NEW').toLowerCase()}`}>
+                                        {selectedEnquiry.status || 'NEW'}
+                                    </span>
+                                </div>
+                                <button className="admin-close-icon" onClick={() => setIsDetailOpen(false)}>
+                                    <X size={16} />
+                                </button>
+                            </div>
+
+                            <div className="enquiry-detail-body">
+                                <div className="detail-grid">
+                                    <div className="detail-field">
+                                        <label><User size={13} /> Student Name</label>
+                                        <p>{selectedEnquiry.studentName}</p>
+                                    </div>
+                                    <div className="detail-field">
+                                        <label><User size={13} /> Parent / Guardian</label>
+                                        <p>{selectedEnquiry.parentName || 'N/A'}</p>
+                                    </div>
+                                    <div className="detail-field">
+                                        <label><GraduationCap size={13} /> Class Applied For</label>
+                                        <p>{selectedEnquiry.classApplyingFor || selectedEnquiry.classAppliedFor}</p>
+                                    </div>
+                                    <div className="detail-field">
+                                        <label><PhoneCall size={13} /> Phone</label>
+                                        <p>{selectedEnquiry.parentPhone || selectedEnquiry.phone}</p>
+                                    </div>
+                                    <div className="detail-field">
+                                        <label><Mail size={13} /> Email</label>
+                                        <p>{selectedEnquiry.parentEmail || 'Not provided'}</p>
+                                    </div>
+                                    <div className="detail-field">
+                                        <label><Calendar size={13} /> Received Date</label>
+                                        <p>{selectedEnquiry.createdAt ? new Date(selectedEnquiry.createdAt).toLocaleString() : 'N/A'}</p>
+                                    </div>
+                                </div>
+
+                                <div className="detail-message-box">
+                                    <label>Parent's Message / Notes</label>
+                                    <p>{selectedEnquiry.message || 'No additional message submitted.'}</p>
+                                </div>
+
+                                {/* Status Update Bar */}
+                                <div className="status-update-section">
+                                    <label>Update Status:</label>
+                                    <div className="status-buttons-row">
+                                        {['NEW', 'CONTACTED', 'ENROLLED', 'CLOSED'].map((st) => (
+                                            <button
+                                                key={st}
+                                                className={`status-btn-choice ${selectedEnquiry.status === st ? 'selected' : ''}`}
+                                                onClick={() => handleStatusChange(selectedEnquiry.id, st)}
+                                            >
+                                                {st}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="detail-actions-footer">
+                                    <button className="btn btn-whatsapp-full" onClick={() => openWhatsApp(selectedEnquiry)}>
+                                        <Send size={16} /> Open WhatsApp Chat with Parent
+                                    </button>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* ANALYTICS MODAL */}
+            <AnimatePresence>
+                {isAnalyticsOpen && (
+                    <div className="form-modal-backdrop" onClick={() => setIsAnalyticsOpen(false)}>
+                        <motion.div
+                            className="form-modal-card analytics-modal"
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="form-modal-header">
+                                <div className="analytics-title-group">
+                                    <BarChart2 size={20} className="analytics-icon" />
+                                    <h4>Enquiry Analytics & Trends</h4>
+                                </div>
+                                <button className="admin-close-icon" onClick={() => setIsAnalyticsOpen(false)}>
+                                    <X size={16} />
+                                </button>
+                            </div>
+
+                            <div className="analytics-body">
+                                {/* Range Selector */}
+                                <div className="analytics-range-selector">
+                                    <button
+                                        className={`range-btn ${analyticsRange === 'week' ? 'active' : ''}`}
+                                        onClick={() => setAnalyticsRange('week')}
+                                    >
+                                        Weekly
+                                    </button>
+                                    <button
+                                        className={`range-btn ${analyticsRange === 'month' ? 'active' : ''}`}
+                                        onClick={() => setAnalyticsRange('month')}
+                                    >
+                                        Monthly
+                                    </button>
+                                    <button
+                                        className={`range-btn ${analyticsRange === 'year' ? 'active' : ''}`}
+                                        onClick={() => setAnalyticsRange('year')}
+                                    >
+                                        Yearly
+                                    </button>
+                                </div>
+
+                                {/* Summary Block */}
+                                <div className="analytics-summary-card">
+                                    <h5>
+                                        Period Total: <strong>{analyticsData.total || 0} enquiries</strong>
+                                    </h5>
+                                    <p className="status-summary-line">
+                                        {analyticsData.total || 0} total —{' '}
+                                        <span className="summary-new">{analyticsData.statusBreakdown?.NEW || 0} New</span>,{' '}
+                                        <span className="summary-contacted">{analyticsData.statusBreakdown?.CONTACTED || 0} Contacted</span>,{' '}
+                                        <span className="summary-enrolled">{analyticsData.statusBreakdown?.ENROLLED || 0} Enrolled</span>,{' '}
+                                        <span className="summary-closed">{analyticsData.statusBreakdown?.CLOSED || 0} Closed</span>
+                                    </p>
+                                </div>
+
+                                {/* Recharts Chart */}
+                                <div className="analytics-chart-container">
+                                    <ResponsiveContainer width="100%" height={240}>
+                                        <BarChart data={analyticsData.timeline || []} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                                            <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+                                            <XAxis dataKey="label" tick={{ fontSize: 11 }} />
+                                            <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
+                                            <Tooltip
+                                                contentStyle={{
+                                                    background: '#1e1e32',
+                                                    border: '1px solid #33334d',
+                                                    borderRadius: '8px',
+                                                    color: '#fff',
+                                                    fontSize: '12px'
+                                                }}
+                                            />
+                                            <Bar dataKey="count" fill="#800000" radius={[4, 4, 0, 0]} name="Enquiries" />
+                                        </BarChart>
+                                    </ResponsiveContainer>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* ANNOUNCEMENT FORM MODAL */}
             <AnimatePresence>
                 {isFormOpen && (
                     <div className="form-modal-backdrop" onClick={() => setIsFormOpen(false)}>

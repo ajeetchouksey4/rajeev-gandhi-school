@@ -21,7 +21,7 @@
     background: #ffffff !important;
     border-radius: var(--radius-xl);
     width: 100%;
-    max-width: 720px;
+    max-width: 800px;
     padding: 0;
     position: relative;
     box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4);
@@ -145,7 +145,7 @@
 
 .admin-login-card p {
     font-size: 0.88rem;
-    color: var(--gray-500);
+    color: var(--text-muted);
     margin-bottom: 24px;
 }
 
@@ -172,90 +172,512 @@
     font-weight: 600;
 }
 
-.hint-text {
-    font-size: 0.78rem;
-    color: var(--text-muted);
-    margin-top: 6px;
+/* Dashboard Navigation Tabs */
+.admin-dashboard {
+    padding: 20px 24px;
+    overflow-y: auto;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
 }
 
-/* Dashboard */
-.admin-dashboard {
-    padding: 24px;
-    overflow-y: auto;
+.admin-nav-tabs {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 2px solid var(--border);
+    padding-bottom: 8px;
+}
+
+.nav-tab-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border: none;
+    background: transparent;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.nav-tab-btn:hover {
+    color: var(--maroon-600);
+    background: rgba(128, 0, 0, 0.05);
+}
+
+.nav-tab-btn.active {
+    color: var(--maroon-700);
+    background: var(--maroon-50);
+    border-bottom: 2px solid var(--maroon-700);
+}
+
+.theme-dark .nav-tab-btn.active {
+    color: var(--gold-400);
+    background: rgba(201, 149, 60, 0.12);
+    border-color: var(--gold-400);
+}
+
+.unread-badge-chip {
+    background: #e63946;
+    color: #ffffff;
+    font-size: 0.72rem;
+    font-weight: 800;
+    padding: 2px 7px;
+    border-radius: 12px;
+}
+
+.tab-count-chip {
+    background: var(--gray-200);
+    color: var(--gray-700);
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 12px;
+}
+
+.theme-dark .tab-count-chip {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+}
+
+.tab-pane {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
     flex: 1;
 }
 
+/* Toolbar & Search */
 .dashboard-toolbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 20px;
     gap: 12px;
     flex-wrap: wrap;
 }
 
-.toolbar-left {
+.search-and-filter {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+}
+
+.search-box {
+    position: relative;
+    flex: 1;
+    max-width: 280px;
+}
+
+.search-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+}
+
+.search-box input {
+    width: 100%;
+    padding: 7px 12px 7px 32px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    background: var(--surface);
+    color: var(--text-primary);
+    outline: none;
+}
+
+.filter-select {
+    padding: 7px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    background: var(--surface);
+    color: var(--text-primary);
+    outline: none;
+}
+
+.active-analytics {
+    background: var(--maroon-700) !important;
+    color: var(--white) !important;
+}
+
+/* Enquiry Cards List */
+.admin-enquiries-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 440px;
+    overflow-y: auto;
+}
+
+.admin-enquiry-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    position: relative;
+}
+
+.admin-enquiry-card:hover {
+    border-color: var(--maroon-300);
+    box-shadow: var(--shadow-sm);
+}
+
+.admin-enquiry-card.unread {
+    border-left: 4px solid #3b82f6;
+    background: rgba(59, 130, 246, 0.03);
+}
+
+.enquiry-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.student-info {
     display: flex;
     align-items: center;
     gap: 8px;
 }
 
-.toolbar-left h4 {
-    font-family: var(--font-heading);
-    font-size: 1.1rem;
-    color: var(--gray-800);
-    margin: 0;
+.unread-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #3b82f6;
+    display: inline-block;
 }
 
-.theme-dark .toolbar-left h4 {
+.student-info h5 {
+    font-size: 0.95rem;
+    margin: 0;
     color: var(--text-primary);
 }
 
-.refresh-btn {
-    background: var(--gray-100);
-    border: 1px solid var(--border);
-    color: var(--gray-600);
-    padding: 4px;
-    border-radius: 50%;
-    cursor: pointer;
+.bold-text {
+    font-weight: 800 !important;
+}
+
+.parent-subtext {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-left: 6px;
+}
+
+.card-right-group {
     display: flex;
     align-items: center;
-    justify-content: center;
+    gap: 10px;
 }
 
-.refresh-btn .spin {
-    animation: spin 0.8s linear infinite;
+/* Status Pills */
+.status-pill {
+    font-size: 0.7rem;
+    font-weight: 800;
+    padding: 3px 10px;
+    border-radius: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
-@keyframes spin {
-    to { transform: rotate(360deg); }
+.status-new {
+    background: #e0f2fe;
+    color: #0369a1;
+    border: 1px solid #bae6fd;
 }
 
-.toolbar-right {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+.status-contacted {
+    background: #fef3c7;
+    color: #b45309;
+    border: 1px solid #fde68a;
 }
 
-.btn-logout {
-    background: var(--gray-100);
-    border: 1px solid var(--border);
-    color: var(--gray-600);
-    padding: 8px 12px;
+.status-enrolled {
+    background: #dcfce7;
+    color: #15803d;
+    border: 1px solid #bbf7d0;
+}
+
+.status-closed {
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+}
+
+/* WhatsApp Buttons */
+.whatsapp-btn-sm {
+    background: #25D366;
+    color: #ffffff;
+    border: none;
+    padding: 4px 10px;
     border-radius: var(--radius-full);
-    cursor: pointer;
+    font-size: 0.75rem;
+    font-weight: 700;
     display: flex;
     align-items: center;
-    justify-content: center;
+    gap: 5px;
+    cursor: pointer;
     transition: var(--transition);
 }
 
-.btn-logout:hover {
-    background: var(--maroon-50);
-    color: var(--maroon-600);
+.whatsapp-btn-sm:hover {
+    background: #1da851;
+    transform: scale(1.03);
 }
 
-/* Notice List Table */
+.btn-whatsapp-full {
+    background: #25D366;
+    color: #ffffff;
+    width: 100%;
+    padding: 11px;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-weight: 700;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-whatsapp-full:hover {
+    background: #1da851;
+}
+
+.enquiry-card-details {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.enquiry-card-details span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.enquiry-msg-snippet {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    background: rgba(0, 0, 0, 0.02);
+    padding: 6px 10px;
+    border-radius: var(--radius-sm);
+}
+
+/* Detail Modal */
+.enquiry-detail-modal {
+    max-width: 600px !important;
+}
+
+.detail-title-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.enquiry-detail-body {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    background: var(--surface);
+    padding: 14px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+}
+
+.detail-field label {
+    font-size: 0.73rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 3px;
+}
+
+.detail-field p {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.detail-message-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 12px 14px;
+    border-radius: var(--radius-md);
+}
+
+.detail-message-box label {
+    font-size: 0.73rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    display: block;
+}
+
+.detail-message-box p {
+    font-size: 0.88rem;
+    color: var(--text-primary);
+    margin: 0;
+    line-height: 1.5;
+}
+
+.status-update-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.status-update-section label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+
+.status-buttons-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+}
+
+.status-btn-choice {
+    padding: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-muted);
+    border-radius: var(--radius-sm);
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.status-btn-choice:hover {
+    border-color: var(--maroon-300);
+}
+
+.status-btn-choice.selected {
+    background: var(--maroon-800);
+    color: var(--white);
+    border-color: var(--maroon-900);
+}
+
+/* Analytics Modal */
+.analytics-modal {
+    max-width: 640px !important;
+}
+
+.analytics-title-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--white);
+}
+
+.analytics-icon {
+    color: var(--gold-400);
+}
+
+.analytics-body {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.analytics-range-selector {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: var(--surface);
+    padding: 4px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+}
+
+.range-btn {
+    flex: 1;
+    padding: 6px 12px;
+    border: none;
+    background: transparent;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    border-radius: var(--radius-xs);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.range-btn.active {
+    background: var(--maroon-700);
+    color: var(--white);
+}
+
+.analytics-summary-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 12px 16px;
+    text-align: center;
+}
+
+.analytics-summary-card h5 {
+    font-size: 1rem;
+    margin: 0 0 4px 0;
+    color: var(--text-primary);
+}
+
+.status-summary-line {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+.summary-new { color: #0284c7; font-weight: 700; }
+.summary-contacted { color: #d97706; font-weight: 700; }
+.summary-enrolled { color: #16a34a; font-weight: 700; }
+.summary-closed { color: #64748b; font-weight: 700; }
+
+.analytics-chart-container {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 16px 10px 10px 10px;
+}
+
+/* Notices List Table */
 .admin-notices-table {
     display: flex;
     flex-direction: column;
