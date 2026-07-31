@@ -3,9 +3,16 @@
 
 const isLocal = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL ||
+let rawBaseUrl = import.meta.env.VITE_API_BASE_URL ||
     import.meta.env.VITE_API_URL ||
     (isLocal ? 'http://localhost:8080/api' : 'https://rajeev-gandhi-school-backend-production-4574.up.railway.app/api')
+
+// Automatically append /api if it's missing from the configured environment variables
+if (rawBaseUrl && !rawBaseUrl.endsWith('/api') && !rawBaseUrl.endsWith('/api/')) {
+    rawBaseUrl = rawBaseUrl.endsWith('/') ? `${rawBaseUrl}api` : `${rawBaseUrl}/api`
+}
+
+const BASE_URL = rawBaseUrl
 
 /**
  * Generic fetch wrapper.
