@@ -84,6 +84,15 @@ const api = {
      */
     delete: (endpoint, options = {}) =>
         request(endpoint, { ...options, method: 'DELETE' }),
+
+    /**
+     * PATCH request
+     * @param {string} endpoint - e.g. '/enquiries/1/status'
+     * @param {object} data     - request body
+     * @param {object} options  - optional fetch overrides
+     */
+    patch: (endpoint, data, options = {}) =>
+        request(endpoint, { ...options, method: 'PATCH', body: data }),
 }
 
 export default api
