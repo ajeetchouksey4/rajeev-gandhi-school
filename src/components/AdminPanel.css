@@ -112,6 +112,24 @@
     background: rgba(255, 255, 255, 0.25);
 }
 
+.form-modal-header .admin-close-icon {
+    color: var(--text-primary);
+    background: var(--gray-100);
+}
+
+.form-modal-header .admin-close-icon:hover {
+    background: var(--gray-200);
+}
+
+.theme-dark .form-modal-header .admin-close-icon {
+    color: var(--white);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.theme-dark .form-modal-header .admin-close-icon:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
 /* Login Card */
 .admin-login-card {
     padding: 40px 30px;
