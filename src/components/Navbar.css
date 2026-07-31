@@ -31,6 +31,8 @@
     align-items: center;
     gap: 12px;
     transition: var(--transition);
+    min-width: 0;
+    flex-shrink: 1;
 }
 
 .nav-logo:hover {
@@ -45,6 +47,12 @@
     justify-content: center;
     overflow: hidden;
     transition: var(--transition);
+    flex-shrink: 0;
+}
+
+.navbar.scrolled .logo-icon {
+    width: 55px;
+    height: 55px;
 }
 
 .logo-icon img {
@@ -56,6 +64,7 @@
 .logo-text {
     display: flex;
     flex-direction: column;
+    min-width: 0;
 }
 
 .logo-name {
@@ -193,16 +202,74 @@
 }
 
 @media (max-width: 600px) {
+    .navbar {
+        padding: 10px 0;
+    }
+
+    .navbar.scrolled {
+        padding: 6px 0;
+    }
+
+    .nav-logo {
+        gap: 8px;
+    }
+
     .logo-name {
-        font-size: 1rem;
+        font-size: 0.92rem;
+        line-height: 1.15;
+        white-space: nowrap;
     }
 
     .logo-sub {
-        font-size: .68rem;
+        font-size: 0.65rem;
+        letter-spacing: 0.5px;
+        line-height: 1.15;
+        white-space: nowrap;
     }
 
     .logo-icon {
-        width: 55px;
-        height: 55px;
+        width: 44px;
+        height: 44px;
+    }
+
+    .navbar.scrolled .logo-icon {
+        width: 40px;
+        height: 40px;
+    }
+
+    .nav-actions {
+        gap: 6px;
+    }
+}
+
+@media (max-width: 520px) {
+    .admin-nav-btn {
+        padding: 8px;
+        border-radius: var(--radius-sm);
+    }
+
+    .admin-nav-btn span {
+        display: none;
+    }
+}
+
+@media (max-width: 380px) {
+    .logo-name {
+        font-size: 0.82rem;
+    }
+
+    .logo-sub {
+        font-size: 0.56rem;
+        letter-spacing: 0px;
+    }
+
+    .logo-icon {
+        width: 36px;
+        height: 36px;
+    }
+
+    .navbar.scrolled .logo-icon {
+        width: 34px;
+        height: 34px;
     }
 }

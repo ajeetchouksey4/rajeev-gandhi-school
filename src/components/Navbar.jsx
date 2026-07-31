@@ -77,6 +77,7 @@ const Navbar = ({ onOpenAdmin }) => {
                         className="admin-nav-btn"
                         onClick={onOpenAdmin}
                         title="Admin Login"
+                        aria-label="Admin Login"
                     >
                         <Lock size={15} />
                         <span>Admin Login</span>
