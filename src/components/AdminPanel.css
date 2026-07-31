@@ -279,6 +279,72 @@
     flex-wrap: wrap;
 }
 
+.toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.refresh-btn {
+    background: var(--gray-100);
+    border: 1px solid var(--border);
+    color: var(--gray-600);
+    padding: 6px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+}
+
+.refresh-btn:hover {
+    background: var(--gray-200);
+    color: var(--text-primary);
+}
+
+.refresh-btn .spin {
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.btn-logout {
+    background: var(--gray-100);
+    border: 1px solid var(--border);
+    color: var(--gray-600);
+    padding: 6px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+}
+
+.btn-logout:hover {
+    background: var(--maroon-50);
+    color: var(--maroon-600);
+}
+
+.theme-dark .refresh-btn,
+.theme-dark .btn-logout {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+}
+
+.theme-dark .refresh-btn:hover,
+.theme-dark .btn-logout:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
 .search-and-filter {
     display: flex;
     align-items: center;
