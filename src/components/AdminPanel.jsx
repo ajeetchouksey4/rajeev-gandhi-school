@@ -489,7 +489,6 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                 {
                     cloud_name: activeCloudName,
                     api_key: activeApiKey,
-                    username: activeCloudName,
                     insert_only: true,
                     multiple: false,
                 },
