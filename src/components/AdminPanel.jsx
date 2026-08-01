@@ -74,34 +74,39 @@ const loadCloudinaryWidgetScript = () => {
     })
 }
 
-const initialMockGallery = [
-    {
-        id: 1,
-        imageUrl: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778142942/trophy1_bz0ht0.jpg',
-        category: 'GENERAL',
-        title: 'Annual Day Celebration',
-        description: 'Vibrant cultural performances and awards ceremony.',
-        eventDate: 'Feb 2026',
-        displayOrder: 1
-    },
-    {
-        id: 2,
-        imageUrl: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778130550/lab_sdvj0y.jpg',
-        category: 'FACILITY',
-        title: 'Composite Science Laboratory',
-        description: 'Modern equipment for physics, chemistry, and biology experiments.',
-        eventDate: '',
-        displayOrder: 2
-    },
-    {
-        id: 3,
-        imageUrl: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778142942/trophy3_vrtlrd.jpg',
-        category: 'HIGHLIGHT',
-        title: 'Sports Day Championship 2026',
-        description: 'Inter-house championship and athletic track events.',
-        eventDate: 'Jan 2026',
-        displayOrder: 3
-    }
+const loadCloudinaryMediaLibraryScript = () => {
+    return new Promise((resolve, reject) => {
+        if (window.cloudinary && window.cloudinary.openMediaLibrary) {
+            return resolve(window.cloudinary)
+        }
+        const existingScript = document.getElementById('cloudinary-media-library-script')
+        if (existingScript) {
+            if (window.cloudinary && window.cloudinary.openMediaLibrary) {
+                return resolve(window.cloudinary)
+            }
+            existingScript.addEventListener('load', () => resolve(window.cloudinary))
+            existingScript.addEventListener('error', (err) => reject(err))
+            return
+        }
+        const script = document.createElement('script')
+        script.id = 'cloudinary-media-library-script'
+        script.src = 'https://media-library.cloudinary.com/global/all.js'
+        script.async = true
+        script.onload = () => resolve(window.cloudinary)
+        script.onerror = (err) => reject(new Error('Failed to load Cloudinary Media Library script'))
+        document.body.appendChild(script)
+    })
+}
+
+const quickCloudinaryAssets = [
+    { name: 'Assembly / Picnic Ground (picnic_tvdsge)', url: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778130550/picnic_tvdsge.jpg' },
+    { name: 'Science Laboratory (lab_sdvj0y)', url: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778130550/lab_sdvj0y.jpg' },
+    { name: 'School Transport Bus (transport1_gql8sk)', url: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778570845/transport1_gql8sk.jpg' },
+    { name: 'Principal Desk PNG (principaldesk_rlj3ls)', url: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778130550/principaldesk_rlj3ls.png' },
+    { name: 'Principal Desk Photo (principal_ht1lxy)', url: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778130550/principal_ht1lxy.jpg' },
+    { name: 'School Inauguration (school-_inauguration_1)', url: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778130550/school-_inauguration_1.jpg' },
+    { name: 'Trophy Ceremony 1 (trophy1_bz0ht0)', url: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778142942/trophy1_bz0ht0.jpg' },
+    { name: 'Trophy Ceremony 3 (trophy3_vrtlrd)', url: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778142942/trophy3_vrtlrd.jpg' },
 ]
 
 const initialMockEnquiries = [
@@ -417,13 +422,16 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
     // Cloudinary credentials state
     const [cloudName, setCloudName] = useState(() => localStorage.getItem('rg_cloudinary_cloud_name') || import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'dzckejmbq')
     const [uploadPreset, setUploadPreset] = useState(() => localStorage.getItem('rg_cloudinary_preset') || import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || 'rg_school_preset')
+    const [apiKey, setApiKey] = useState(() => localStorage.getItem('rg_cloudinary_api_key') || import.meta.env.VITE_CLOUDINARY_API_KEY || '97188adfbc3d685c0c1aaae1eec81a')
     const [showCloudinarySettings, setShowCloudinarySettings] = useState(false)
 
-    const handleSaveCloudinarySettings = (newCloudName, newPreset) => {
+    const handleSaveCloudinarySettings = (newCloudName, newPreset, newApiKey) => {
         setCloudName(newCloudName)
         setUploadPreset(newPreset)
+        if (newApiKey !== undefined) setApiKey(newApiKey)
         localStorage.setItem('rg_cloudinary_cloud_name', newCloudName)
         localStorage.setItem('rg_cloudinary_preset', newPreset)
+        if (newApiKey !== undefined) localStorage.setItem('rg_cloudinary_api_key', newApiKey)
     }
 
     const handleOpenCloudinaryWidget = async () => {
@@ -462,6 +470,44 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
             widget.open()
         } catch (err) {
             alert(`Could not launch Cloudinary widget: ${err.message}`)
+        }
+    }
+
+    const handleOpenCloudinaryMediaLibrary = async () => {
+        try {
+            const cloudinary = await loadCloudinaryMediaLibraryScript()
+            if (!cloudinary || !cloudinary.openMediaLibrary) {
+                alert('Cloudinary Media Library SDK could not be loaded.')
+                return
+            }
+            const activeCloudName = cloudName || import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'dzckejmbq'
+            const activeApiKey = apiKey || localStorage.getItem('rg_cloudinary_api_key') || '97188adfbc3d685c0c1aaae1eec81a'
+
+            cloudinary.openMediaLibrary(
+                {
+                    cloud_name: activeCloudName,
+                    api_key: activeApiKey,
+                    username: activeCloudName,
+                    insert_only: true,
+                    multiple: false,
+                },
+                {
+                    insertHandler: function (data) {
+                        if (data && data.assets && data.assets.length > 0) {
+                            const selectedAsset = data.assets[0]
+                            const url = selectedAsset.secure_url
+                            const title = selectedAsset.public_id || selectedAsset.filename || ''
+                            setGalleryFormData((prev) => ({
+                                ...prev,
+                                imageUrl: url,
+                                title: prev.title || title
+                            }))
+                        }
+                    }
+                }
+            )
+        } catch (err) {
+            alert(`Could not launch Media Library: ${err.message}`)
         }
     }
 
@@ -1537,21 +1583,33 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                                 <div className="form-group cloudinary-upload-section">
                                     <label>Cloudinary Image Upload *</label>
                                     <div className="cloudinary-box-trigger">
-                                        <button
-                                            type="button"
-                                            className="btn btn-cloudinary-widget"
-                                            onClick={handleOpenCloudinaryWidget}
-                                        >
-                                            <UploadCloud size={20} />
-                                            <span>Upload Image via Cloudinary Widget</span>
-                                        </button>
-                                         <p className="upload-hint">Uploads directly to Cloudinary folder (JPG, PNG, WEBP, max 5MB)</p>
+                                        <div className="dual-widget-buttons">
+                                            <button
+                                                type="button"
+                                                className="btn btn-cloudinary-widget"
+                                                onClick={handleOpenCloudinaryWidget}
+                                                title="Upload new file from device"
+                                            >
+                                                <UploadCloud size={18} />
+                                                <span>Upload New File</span>
+                                            </button>
+                                            <button
+                                                type="button"
+                                                className="btn btn-cloudinary-library"
+                                                onClick={handleOpenCloudinaryMediaLibrary}
+                                                title="Browse all photos from your Cloudinary Account"
+                                            >
+                                                <Image size={18} />
+                                                <span>Cloudinary Media Library</span>
+                                            </button>
+                                        </div>
+                                        <p className="upload-hint">Upload new files or browse existing photos from your Cloudinary account</p>
                                         <button
                                             type="button"
                                             className="btn-link-settings"
                                             onClick={() => setShowCloudinarySettings(!showCloudinarySettings)}
                                         >
-                                            {showCloudinarySettings ? '⚙️ Hide Settings' : '⚙️ Configure Cloud Name & Preset'}
+                                            {showCloudinarySettings ? '⚙️ Hide Settings' : '⚙️ Configure Cloud Name, Preset & API Key'}
                                         </button>
                                     </div>
 
@@ -1562,7 +1620,7 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                                                 <input
                                                     type="text"
                                                     value={cloudName}
-                                                    onChange={(e) => handleSaveCloudinarySettings(e.target.value, uploadPreset)}
+                                                    onChange={(e) => handleSaveCloudinarySettings(e.target.value, uploadPreset, apiKey)}
                                                     placeholder="Cloud Name e.g. dzckejmbq"
                                                 />
                                             </div>
@@ -1571,12 +1629,47 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                                                 <input
                                                     type="text"
                                                     value={uploadPreset}
-                                                    onChange={(e) => handleSaveCloudinarySettings(cloudName, e.target.value)}
+                                                    onChange={(e) => handleSaveCloudinarySettings(cloudName, e.target.value, apiKey)}
                                                     placeholder="Upload Preset e.g. rg_school_preset"
+                                                />
+                                            </div>
+                                            <div className="form-group margin-top-xs">
+                                                <label className="text-xs">API Key (For Media Library)</label>
+                                                <input
+                                                    type="text"
+                                                    value={apiKey}
+                                                    onChange={(e) => handleSaveCloudinarySettings(cloudName, uploadPreset, e.target.value)}
+                                                    placeholder="API Key e.g. 97188adfbc3d685c0c1aaae1eec81a"
                                                 />
                                             </div>
                                         </div>
                                     )}
+
+                                    {/* Quick Selector for Account Assets */}
+                                    <div className="form-group margin-top-sm">
+                                        <label className="text-xs">Or Pick From Your Existing Account Assets:</label>
+                                        <select
+                                            className="filter-select select-full-width"
+                                            onChange={(e) => {
+                                                if (e.target.value) {
+                                                    const selected = quickCloudinaryAssets.find(a => a.url === e.target.value)
+                                                    setGalleryFormData(prev => ({
+                                                        ...prev,
+                                                        imageUrl: e.target.value,
+                                                        title: prev.title || (selected ? selected.name.split(' (')[0] : '')
+                                                    }))
+                                                }
+                                            }}
+                                            defaultValue=""
+                                        >
+                                            <option value="" disabled>-- Select an existing Cloudinary asset --</option>
+                                            {quickCloudinaryAssets.map((asset, idx) => (
+                                                <option key={idx} value={asset.url}>
+                                                    {asset.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
 
                                     {galleryFormData.imageUrl ? (
                                         <div className="image-preview-container">
