@@ -25,7 +25,8 @@ import {
     Clock,
     Send,
     Bell,
-    Download
+    Download,
+    FileSpreadsheet
 } from 'lucide-react'
 import {
     ResponsiveContainer,
@@ -42,10 +43,12 @@ import './AdminPanel.css'
 const categories = ['Admissions', 'Exams', 'Academic', 'Events', 'Circulars']
 const badges = ['URGENT', 'IMPORTANT', 'NOTICE', 'EVENT', 'MEETING']
 const statusOptions = ['ALL', 'NEW', 'CONTACTED', 'ENROLLED', 'CLOSED']
+const categoryFilterOptions = ['ALL', 'ADMISSION', 'GENERAL', 'CAREER', 'BUSINESS']
 
 const initialMockEnquiries = [
     {
         id: 101,
+        category: 'ADMISSION',
         studentName: 'Aarav Sharma',
         parentName: 'Rajesh Sharma',
         parentPhone: '9876543210',
@@ -58,6 +61,7 @@ const initialMockEnquiries = [
     },
     {
         id: 102,
+        category: 'ADMISSION',
         studentName: 'Ananya Verma',
         parentName: 'Suman Verma',
         parentPhone: '9988776655',
@@ -70,15 +74,16 @@ const initialMockEnquiries = [
     },
     {
         id: 103,
-        studentName: 'Rohan Gupta',
-        parentName: 'Vikram Gupta',
+        category: 'CAREER',
+        studentName: '',
+        parentName: 'Priya Mehta',
         parentPhone: '9123456789',
-        parentEmail: 'vikram.g@example.com',
-        classApplyingFor: 'Class 11 – Science',
-        message: 'Wants to enquire about JEE coaching along with MP Board curriculum.',
-        status: 'ENROLLED',
-        isRead: true,
-        createdAt: '2026-07-28T09:00:00',
+        parentEmail: 'priya.m@example.com',
+        classApplyingFor: '',
+        message: 'Applying for Senior PGT Mathematics Teacher position. Have 6 years MP Board experience.',
+        status: 'NEW',
+        isRead: false,
+        createdAt: '2026-07-29T11:20:00',
     }
 ]
 
@@ -108,6 +113,7 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
     // Enquiries state
     const [enquiries, setEnquiries] = useState([])
     const [unreadCount, setUnreadCount] = useState(0)
+    const [categoryFilter, setCategoryFilter] = useState('ALL')
     const [statusFilter, setStatusFilter] = useState('ALL')
     const [searchQuery, setSearchQuery] = useState('')
     const [selectedEnquiry, setSelectedEnquiry] = useState(null)
@@ -119,6 +125,7 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
     const [analyticsData, setAnalyticsData] = useState({
         total: 0,
         statusBreakdown: { NEW: 0, CONTACTED: 0, ENROLLED: 0, CLOSED: 0 },
+        categoryBreakdown: { ADMISSION: 0, GENERAL: 0, CAREER: 0, BUSINESS: 0 },
         timeline: []
     })
 
@@ -151,6 +158,7 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
         try {
             let endpoint = '/enquiries'
             const params = new URLSearchParams()
+            if (categoryFilter && categoryFilter !== 'ALL') params.append('category', categoryFilter)
             if (statusFilter && statusFilter !== 'ALL') params.append('status', statusFilter)
             if (searchQuery) params.append('search', searchQuery)
             if (params.toString()) endpoint += `?${params.toString()}`
@@ -161,7 +169,6 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                 setEnquiries(data)
                 setIsBackendConnected(true)
 
-                // Fetch unread count
                 try {
                     const countRes = await api.get('/enquiries/unread-count')
                     const countData = await countRes.json()
@@ -177,8 +184,10 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
             const saved = localStorage.getItem('rg_enquiries')
             const localData = saved !== null ? JSON.parse(saved) : initialMockEnquiries
             
-            // Filter local data
             let filtered = [...localData]
+            if (categoryFilter && categoryFilter !== 'ALL') {
+                filtered = filtered.filter(item => (item.category || 'ADMISSION') === categoryFilter)
+            }
             if (statusFilter && statusFilter !== 'ALL') {
                 filtered = filtered.filter(item => item.status === statusFilter)
             }
@@ -201,11 +210,10 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
     // Fetch analytics
     const fetchAnalytics = async (range = analyticsRange) => {
         try {
-            const res = await api.get(`/enquiries/analytics?range=${range}`)
+            const res = await api.get(`/enquiries/analytics?range=${range}&category=${categoryFilter}`)
             const data = await res.json()
             setAnalyticsData(data)
         } catch (err) {
-            // Local fallback analytics
             const saved = localStorage.getItem('rg_enquiries')
             const list = saved !== null ? JSON.parse(saved) : initialMockEnquiries
             const total = list.length
@@ -214,6 +222,12 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                 CONTACTED: list.filter(e => e.status === 'CONTACTED').length,
                 ENROLLED: list.filter(e => e.status === 'ENROLLED').length,
                 CLOSED: list.filter(e => e.status === 'CLOSED').length,
+            }
+            const categoryBreakdown = {
+                ADMISSION: list.filter(e => (e.category || 'ADMISSION') === 'ADMISSION').length,
+                GENERAL: list.filter(e => e.category === 'GENERAL').length,
+                CAREER: list.filter(e => e.category === 'CAREER').length,
+                BUSINESS: list.filter(e => e.category === 'BUSINESS').length,
             }
             
             let timeline = []
@@ -239,27 +253,35 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                     { label: 'Fri', count: total },
                 ]
             }
-            setAnalyticsData({ total, statusBreakdown, timeline })
+            setAnalyticsData({ total, statusBreakdown, categoryBreakdown, timeline })
         }
     }
 
-    const handleExportCSV = () => {
+    const handleExportCSV = (onlyAdmissions = false) => {
         if (!enquiries || enquiries.length === 0) {
-            alert('No enquiries to export.')
+            alert('No enquiries available to export.')
             return
         }
 
-        // CSV Header
-        const headers = ['ID', 'Student Name', 'Parent Name', 'Phone', 'Email', 'Class Applied For', 'Message', 'Status', 'Date']
+        const targetList = onlyAdmissions 
+            ? enquiries.filter(e => (e.category || 'ADMISSION') === 'ADMISSION')
+            : enquiries
+
+        if (targetList.length === 0) {
+            alert(onlyAdmissions ? 'No admission enquiries found to export.' : 'No enquiries found to export.')
+            return
+        }
+
+        const headers = ['ID', 'Category', 'Student Name', 'Parent / Contact Name', 'Phone', 'Email', 'Class Applied For', 'Message', 'Status', 'Date']
         
-        // Map rows and escape commas/quotes
-        const rows = enquiries.map(enq => [
+        const rows = targetList.map(enq => [
             enq.id || '',
-            enq.studentName || '',
+            enq.category || 'ADMISSION',
+            enq.studentName || 'N/A',
             enq.parentName || '',
             enq.parentPhone || enq.phone || '',
             enq.parentEmail || '',
-            enq.classApplyingFor || enq.classAppliedFor || '',
+            enq.classApplyingFor || enq.classAppliedFor || 'N/A',
             (enq.message || '').replace(/"/g, '""').replace(/\n/g, ' '),
             enq.status || 'NEW',
             enq.createdAt ? new Date(enq.createdAt).toLocaleString() : ''
@@ -270,12 +292,15 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
             ...rows.map(e => e.map(val => `"${val}"`).join(','))
         ].join('\n')
 
-        // Create blob and trigger download
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
         const url = URL.createObjectURL(blob)
         const link = document.createElement('a')
+        const filename = onlyAdmissions 
+            ? `admissions_enquiries_${new Date().toISOString().slice(0, 10)}.csv`
+            : `all_enquiries_${new Date().toISOString().slice(0, 10)}.csv`
+
         link.setAttribute('href', url)
-        link.setAttribute('download', `enquiries_export_${new Date().toISOString().slice(0, 10)}.csv`)
+        link.setAttribute('download', filename)
         document.body.appendChild(link)
         link.click()
         document.body.removeChild(link)
@@ -286,7 +311,7 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
             fetchAnnouncements()
             fetchEnquiries()
         }
-    }, [isOpen, statusFilter, searchQuery])
+    }, [isOpen, categoryFilter, statusFilter, searchQuery])
 
     useEffect(() => {
         if (isAnalyticsOpen) {
@@ -294,7 +319,6 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
         }
     }, [isAnalyticsOpen, analyticsRange])
 
-    // Lock body scroll when modal active
     useEffect(() => {
         if (isOpen) {
             document.body.style.overflow = 'hidden'
@@ -342,12 +366,10 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
         }
     }
 
-    // Enquiry Actions
     const handleOpenDetail = async (item) => {
         setSelectedEnquiry(item)
         setIsDetailOpen(true)
 
-        // Mark as read
         if (!item.isRead) {
             if (isBackendConnected) {
                 try {
@@ -357,7 +379,6 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                     console.error(err)
                 }
             } else {
-                // LocalStorage update
                 const saved = localStorage.getItem('rg_enquiries')
                 const list = saved !== null ? JSON.parse(saved) : initialMockEnquiries
                 const updated = list.map(e => e.id === item.id ? { ...e, isRead: true } : e)
@@ -394,11 +415,18 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
     const openWhatsApp = (enquiry) => {
         const phone = (enquiry.parentPhone || enquiry.phone || '').replace(/\D/g, '')
         const formattedPhone = phone.length === 10 ? `91${phone}` : phone
-        const parentName = enquiry.parentName || 'Parent'
+        const name = enquiry.parentName || enquiry.studentName || 'there'
+        const isAdmission = (enquiry.category || 'ADMISSION') === 'ADMISSION'
         const studentName = enquiry.studentName || 'your child'
         const classAppliedFor = enquiry.classApplyingFor || enquiry.classAppliedFor || 'our school'
 
-        const text = `Hi ${parentName}, thank you for your enquiry about admission for ${studentName} in ${classAppliedFor}. We'd love to help — let us know a good time to talk.`
+        let text = ''
+        if (isAdmission) {
+            text = `Hi ${name}, thank you for your enquiry about admission for ${studentName} in ${classAppliedFor}. We'd love to help — let us know a good time to talk.`
+        } else {
+            text = `Hi ${name}, thank you for reaching out to Rajeev Gandhi Convent School regarding your enquiry (${enquiry.category || 'General'}). How can we assist you today?`
+        }
+
         const url = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(text)}`
         window.open(url, '_blank')
     }
@@ -534,7 +562,6 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
 
                 {/* Main Body */}
                 {!isAuthenticated ? (
-                    /* PASSCODE LOGIN SCREEN */
                     <div className="admin-login-card">
                         <div className="login-icon-box">
                             <Lock size={28} />
@@ -557,7 +584,6 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                         </form>
                     </div>
                 ) : (
-                    /* ADMIN DASHBOARD WITH TABS */
                     <div className="admin-dashboard">
                         {/* Sidebar / Navigation Tabs */}
                         <div className="admin-nav-tabs">
@@ -592,7 +618,7 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                                             <Search size={15} className="search-icon" />
                                             <input
                                                 type="text"
-                                                placeholder="Search student, parent, phone..."
+                                                placeholder="Search name, phone, details..."
                                                 value={searchQuery}
                                                 onChange={(e) => setSearchQuery(e.target.value)}
                                             />
@@ -600,8 +626,22 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
 
                                         <select
                                             className="filter-select"
+                                            value={categoryFilter}
+                                            onChange={(e) => setCategoryFilter(e.target.value)}
+                                            title="Filter by Purpose Category"
+                                        >
+                                            {categoryFilterOptions.map(cat => (
+                                                <option key={cat} value={cat}>
+                                                    {cat === 'ALL' ? 'All Categories' : cat}
+                                                </option>
+                                            ))}
+                                        </select>
+
+                                        <select
+                                            className="filter-select"
                                             value={statusFilter}
                                             onChange={(e) => setStatusFilter(e.target.value)}
+                                            title="Filter by Status"
                                         >
                                             {statusOptions.map(st => (
                                                 <option key={st} value={st}>
@@ -618,10 +658,17 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                                     <div className="toolbar-right">
                                         <button
                                             className="btn btn-secondary btn-sm"
-                                            onClick={handleExportCSV}
-                                            title="Export Enquiries to Excel/CSV"
+                                            onClick={() => handleExportCSV(true)}
+                                            title="Export Admissions Only to Excel"
                                         >
-                                            <Download size={15} /> Export Excel
+                                            <FileSpreadsheet size={15} /> Export Admissions
+                                        </button>
+                                        <button
+                                            className="btn btn-secondary btn-sm"
+                                            onClick={() => handleExportCSV(false)}
+                                            title="Export All Enquiries to Excel"
+                                        >
+                                            <Download size={15} /> Export All
                                         </button>
                                         <button
                                             className={`btn btn-secondary btn-sm ${isAnalyticsOpen ? 'active-analytics' : ''}`}
@@ -640,6 +687,7 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                                     {enquiries.length > 0 ? (
                                         enquiries.map((enq) => {
                                             const isUnread = !enq.isRead
+                                            const cat = enq.category || 'ADMISSION'
                                             return (
                                                 <div
                                                     key={enq.id}
@@ -649,12 +697,17 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                                                     <div className="enquiry-card-header">
                                                         <div className="student-info">
                                                             {isUnread && <span className="unread-dot" title="Unread Enquiry" />}
-                                                            <h5 className={isUnread ? 'bold-text' : ''}>
-                                                                {enq.studentName}
-                                                            </h5>
-                                                            <span className="parent-subtext">
-                                                                Parent: <strong>{enq.parentName || 'Parent / Guardian'}</strong>
+                                                            <span className={`category-badge-chip cat-${cat.toLowerCase()}`}>
+                                                                {cat}
                                                             </span>
+                                                            <h5 className={isUnread ? 'bold-text' : ''}>
+                                                                {enq.parentName || enq.studentName || 'Visitor'}
+                                                            </h5>
+                                                            {cat === 'ADMISSION' && enq.studentName && (
+                                                                <span className="parent-subtext">
+                                                                    Student: <strong>{enq.studentName}</strong>
+                                                                </span>
+                                                            )}
                                                         </div>
                                                         <div className="card-right-group">
                                                             <span className={`status-pill status-${(enq.status || 'NEW').toLowerCase()}`}>
@@ -674,7 +727,9 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                                                     </div>
 
                                                     <div className="enquiry-card-details">
-                                                        <span><GraduationCap size={13} /> Class: <strong>{enq.classApplyingFor || enq.classAppliedFor}</strong></span>
+                                                        {cat === 'ADMISSION' && (enq.classApplyingFor || enq.classAppliedFor) && (
+                                                            <span><GraduationCap size={13} /> Class: <strong>{enq.classApplyingFor || enq.classAppliedFor}</strong></span>
+                                                        )}
                                                         <span><PhoneCall size={13} /> {enq.parentPhone || enq.phone}</span>
                                                         {enq.createdAt && (
                                                             <span><Clock size={13} /> {new Date(enq.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}</span>
@@ -700,7 +755,6 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                         {/* ANNOUNCEMENTS TAB CONTENT */}
                         {activeTab === 'notices' && (
                             <div className="tab-pane">
-                                {/* Toolbar */}
                                 <div className="dashboard-toolbar">
                                     <div className="toolbar-left">
                                         <h4>Announcement Manager ({announcements.length})</h4>
@@ -718,7 +772,6 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                                     </div>
                                 </div>
 
-                                {/* List Table */}
                                 <div className="admin-notices-table">
                                     {announcements.length > 0 ? (
                                         [...announcements]
@@ -794,6 +847,9 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                             <div className="form-modal-header">
                                 <div className="detail-title-group">
                                     <h4>Enquiry Details</h4>
+                                    <span className={`category-badge-chip cat-${(selectedEnquiry.category || 'ADMISSION').toLowerCase()}`}>
+                                        {selectedEnquiry.category || 'ADMISSION'}
+                                    </span>
                                     <span className={`status-pill status-${(selectedEnquiry.status || 'NEW').toLowerCase()}`}>
                                         {selectedEnquiry.status || 'NEW'}
                                     </span>
@@ -806,17 +862,21 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                             <div className="enquiry-detail-body">
                                 <div className="detail-grid">
                                     <div className="detail-field">
-                                        <label><User size={13} /> Student Name</label>
-                                        <p>{selectedEnquiry.studentName}</p>
-                                    </div>
-                                    <div className="detail-field">
-                                        <label><User size={13} /> Parent / Guardian</label>
+                                        <label><User size={13} /> Contact Name</label>
                                         <p>{selectedEnquiry.parentName || 'N/A'}</p>
                                     </div>
-                                    <div className="detail-field">
-                                        <label><GraduationCap size={13} /> Class Applied For</label>
-                                        <p>{selectedEnquiry.classApplyingFor || selectedEnquiry.classAppliedFor}</p>
-                                    </div>
+                                    {(selectedEnquiry.category || 'ADMISSION') === 'ADMISSION' && (
+                                        <>
+                                            <div className="detail-field">
+                                                <label><User size={13} /> Student Name</label>
+                                                <p>{selectedEnquiry.studentName || 'N/A'}</p>
+                                            </div>
+                                            <div className="detail-field">
+                                                <label><GraduationCap size={13} /> Class Applied For</label>
+                                                <p>{selectedEnquiry.classApplyingFor || selectedEnquiry.classAppliedFor || 'N/A'}</p>
+                                            </div>
+                                        </>
+                                    )}
                                     <div className="detail-field">
                                         <label><PhoneCall size={13} /> Phone</label>
                                         <p>{selectedEnquiry.parentPhone || selectedEnquiry.phone}</p>
@@ -832,11 +892,10 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                                 </div>
 
                                 <div className="detail-message-box">
-                                    <label>Parent's Message / Notes</label>
+                                    <label>Message / Enquiry Details</label>
                                     <p>{selectedEnquiry.message || 'No additional message submitted.'}</p>
                                 </div>
 
-                                {/* Status Update Bar */}
                                 <div className="status-update-section">
                                     <label>Update Status:</label>
                                     <div className="status-buttons-row">
@@ -854,7 +913,7 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
 
                                 <div className="detail-actions-footer">
                                     <button className="btn btn-whatsapp-full" onClick={() => openWhatsApp(selectedEnquiry)}>
-                                        <Send size={16} /> Open WhatsApp Chat with Parent
+                                        <Send size={16} /> Open WhatsApp Chat with Contact
                                     </button>
                                 </div>
                             </div>
@@ -885,7 +944,6 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                             </div>
 
                             <div className="analytics-body">
-                                {/* Range Selector */}
                                 <div className="analytics-range-selector">
                                     <button
                                         className={`range-btn ${analyticsRange === 'week' ? 'active' : ''}`}
@@ -907,7 +965,6 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                                     </button>
                                 </div>
 
-                                {/* Summary Block */}
                                 <div className="analytics-summary-card">
                                     <h5>
                                         Period Total: <strong>{analyticsData.total || 0} enquiries</strong>
@@ -921,7 +978,6 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                                     </p>
                                 </div>
 
-                                {/* Recharts Chart */}
                                 <div className="analytics-chart-container">
                                     <ResponsiveContainer width="100%" height={240}>
                                         <BarChart data={analyticsData.timeline || []} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
