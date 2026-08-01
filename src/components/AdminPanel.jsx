@@ -122,6 +122,7 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
     // Analytics state
     const [isAnalyticsOpen, setIsAnalyticsOpen] = useState(false)
     const [analyticsRange, setAnalyticsRange] = useState('week')
+    const [analyticsCategoryScope, setAnalyticsCategoryScope] = useState('ALL')
     const [analyticsData, setAnalyticsData] = useState({
         total: 0,
         statusBreakdown: { NEW: 0, CONTACTED: 0, ENROLLED: 0, CLOSED: 0 },
@@ -208,14 +209,18 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
     }
 
     // Fetch analytics
-    const fetchAnalytics = async (range = analyticsRange) => {
+    const fetchAnalytics = async (range = analyticsRange, catScope = analyticsCategoryScope) => {
         try {
-            const res = await api.get(`/enquiries/analytics?range=${range}&category=${categoryFilter}`)
+            const res = await api.get(`/enquiries/analytics?range=${range}&category=${catScope}`)
             const data = await res.json()
             setAnalyticsData(data)
         } catch (err) {
             const saved = localStorage.getItem('rg_enquiries')
-            const list = saved !== null ? JSON.parse(saved) : initialMockEnquiries
+            const rawList = saved !== null ? JSON.parse(saved) : initialMockEnquiries
+            const list = catScope && catScope !== 'ALL'
+                ? rawList.filter(e => (e.category || 'ADMISSION') === catScope)
+                : rawList
+
             const total = list.length
             const statusBreakdown = {
                 NEW: list.filter(e => e.status === 'NEW').length,
@@ -224,10 +229,10 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                 CLOSED: list.filter(e => e.status === 'CLOSED').length,
             }
             const categoryBreakdown = {
-                ADMISSION: list.filter(e => (e.category || 'ADMISSION') === 'ADMISSION').length,
-                GENERAL: list.filter(e => e.category === 'GENERAL').length,
-                CAREER: list.filter(e => e.category === 'CAREER').length,
-                BUSINESS: list.filter(e => e.category === 'BUSINESS').length,
+                ADMISSION: rawList.filter(e => (e.category || 'ADMISSION') === 'ADMISSION').length,
+                GENERAL: rawList.filter(e => e.category === 'GENERAL').length,
+                CAREER: rawList.filter(e => e.category === 'CAREER').length,
+                BUSINESS: rawList.filter(e => e.category === 'BUSINESS').length,
             }
             
             let timeline = []
@@ -315,9 +320,9 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
 
     useEffect(() => {
         if (isAnalyticsOpen) {
-            fetchAnalytics(analyticsRange)
+            fetchAnalytics(analyticsRange, analyticsCategoryScope)
         }
-    }, [isAnalyticsOpen, analyticsRange])
+    }, [isAnalyticsOpen, analyticsRange, analyticsCategoryScope])
 
     useEffect(() => {
         if (isOpen) {
@@ -962,6 +967,39 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                                         onClick={() => setAnalyticsRange('year')}
                                     >
                                         Yearly
+                                    </button>
+                                </div>
+
+                                <div className="analytics-scope-bar">
+                                    <button
+                                        className={`scope-btn ${analyticsCategoryScope === 'ALL' ? 'active' : ''}`}
+                                        onClick={() => setAnalyticsCategoryScope('ALL')}
+                                    >
+                                        All Enquiries
+                                    </button>
+                                    <button
+                                        className={`scope-btn ${analyticsCategoryScope === 'ADMISSION' ? 'active' : ''}`}
+                                        onClick={() => setAnalyticsCategoryScope('ADMISSION')}
+                                    >
+                                        🎓 Admissions Only
+                                    </button>
+                                    <button
+                                        className={`scope-btn ${analyticsCategoryScope === 'GENERAL' ? 'active' : ''}`}
+                                        onClick={() => setAnalyticsCategoryScope('GENERAL')}
+                                    >
+                                        ❓ General
+                                    </button>
+                                    <button
+                                        className={`scope-btn ${analyticsCategoryScope === 'CAREER' ? 'active' : ''}`}
+                                        onClick={() => setAnalyticsCategoryScope('CAREER')}
+                                    >
+                                        💼 Careers
+                                    </button>
+                                    <button
+                                        className={`scope-btn ${analyticsCategoryScope === 'BUSINESS' ? 'active' : ''}`}
+                                        onClick={() => setAnalyticsCategoryScope('BUSINESS')}
+                                    >
+                                        🤝 Business
                                     </button>
                                 </div>
 

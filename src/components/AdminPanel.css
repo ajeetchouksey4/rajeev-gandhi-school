@@ -762,6 +762,38 @@
     color: var(--white);
 }
 
+.analytics-scope-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 4px;
+}
+
+.scope-btn {
+    padding: 5px 10px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.scope-btn:hover {
+    border-color: var(--maroon-300);
+}
+
+.scope-btn.active {
+    background: var(--maroon-800);
+    color: var(--white);
+    border-color: var(--maroon-900);
+    box-shadow: var(--shadow-xs);
+}
+
 .analytics-summary-card {
     background: var(--surface);
     border: 1px solid var(--border);
