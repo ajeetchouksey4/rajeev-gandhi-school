@@ -444,7 +444,7 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                     clientAllowedFormats: ['jpg', 'png', 'webp', 'jpeg'],
                     maxFileSize: 5242880, // 5MB
                     multiple: false,
-                    sources: ['local', 'url', 'camera'],
+                    sources: ['local', 'url', 'camera', 'image_search', 'google_drive', 'unsplash'],
                 },
                 (error, result) => {
                     if (!error && result && result.event === 'success') {
