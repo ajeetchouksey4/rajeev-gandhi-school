@@ -24,7 +24,8 @@ import {
     GraduationCap,
     Clock,
     Send,
-    Bell
+    Bell,
+    Download
 } from 'lucide-react'
 import {
     ResponsiveContainer,
@@ -240,6 +241,44 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
             }
             setAnalyticsData({ total, statusBreakdown, timeline })
         }
+    }
+
+    const handleExportCSV = () => {
+        if (!enquiries || enquiries.length === 0) {
+            alert('No enquiries to export.')
+            return
+        }
+
+        // CSV Header
+        const headers = ['ID', 'Student Name', 'Parent Name', 'Phone', 'Email', 'Class Applied For', 'Message', 'Status', 'Date']
+        
+        // Map rows and escape commas/quotes
+        const rows = enquiries.map(enq => [
+            enq.id || '',
+            enq.studentName || '',
+            enq.parentName || '',
+            enq.parentPhone || enq.phone || '',
+            enq.parentEmail || '',
+            enq.classApplyingFor || enq.classAppliedFor || '',
+            (enq.message || '').replace(/"/g, '""').replace(/\n/g, ' '),
+            enq.status || 'NEW',
+            enq.createdAt ? new Date(enq.createdAt).toLocaleString() : ''
+        ])
+
+        const csvContent = [
+            headers.join(','),
+            ...rows.map(e => e.map(val => `"${val}"`).join(','))
+        ].join('\n')
+
+        // Create blob and trigger download
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+        const url = URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.setAttribute('href', url)
+        link.setAttribute('download', `enquiries_export_${new Date().toISOString().slice(0, 10)}.csv`)
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
     }
 
     useEffect(() => {
@@ -577,6 +616,13 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                                     </div>
 
                                     <div className="toolbar-right">
+                                        <button
+                                            className="btn btn-secondary btn-sm"
+                                            onClick={handleExportCSV}
+                                            title="Export Enquiries to Excel/CSV"
+                                        >
+                                            <Download size={15} /> Export Excel
+                                        </button>
                                         <button
                                             className={`btn btn-secondary btn-sm ${isAnalyticsOpen ? 'active-analytics' : ''}`}
                                             onClick={() => setIsAnalyticsOpen(true)}
