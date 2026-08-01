@@ -25,7 +25,7 @@ const Gallery = () => {
     useEffect(() => {
         const fetchGallery = async () => {
             try {
-                const res = await api.get('/gallery')
+                const res = await api.get('/gallery?category=GENERAL')
                 const data = await res.json()
                 if (Array.isArray(data) && data.length > 0) {
                     const mapped = data.map((item, idx) => ({
@@ -33,7 +33,7 @@ const Gallery = () => {
                         label: item.title || item.description || 'School Photo',
                         wide: idx % 5 === 0 || idx % 5 === 4
                     }))
-                    setImages(mapped)
+                    setImages([...mapped, ...defaultImages])
                 }
             } catch (err) {
                 // Keep default images fallback when offline or no backend

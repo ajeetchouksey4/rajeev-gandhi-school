@@ -1605,46 +1605,7 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                                             </button>
                                         </div>
                                         <p className="upload-hint">Upload new files or browse existing photos from your Cloudinary account</p>
-                                        <button
-                                            type="button"
-                                            className="btn-link-settings"
-                                            onClick={() => setShowCloudinarySettings(!showCloudinarySettings)}
-                                        >
-                                            {showCloudinarySettings ? '⚙️ Hide Settings' : '⚙️ Configure Cloud Name, Preset & API Key'}
-                                        </button>
                                     </div>
-
-                                    {showCloudinarySettings && (
-                                        <div className="cloudinary-config-box">
-                                            <div className="form-group margin-top-xs">
-                                                <label className="text-xs">Cloud Name</label>
-                                                <input
-                                                    type="text"
-                                                    value={cloudName}
-                                                    onChange={(e) => handleSaveCloudinarySettings(e.target.value, uploadPreset, apiKey)}
-                                                    placeholder="Cloud Name e.g. dzckejmbq"
-                                                />
-                                            </div>
-                                            <div className="form-group margin-top-xs">
-                                                <label className="text-xs">Unsigned Upload Preset</label>
-                                                <input
-                                                    type="text"
-                                                    value={uploadPreset}
-                                                    onChange={(e) => handleSaveCloudinarySettings(cloudName, e.target.value, apiKey)}
-                                                    placeholder="Upload Preset e.g. rg_school_preset"
-                                                />
-                                            </div>
-                                            <div className="form-group margin-top-xs">
-                                                <label className="text-xs">API Key (Signed System)</label>
-                                                <input
-                                                    type="text"
-                                                    value={apiKey}
-                                                    onChange={(e) => handleSaveCloudinarySettings(cloudName, uploadPreset, e.target.value)}
-                                                    placeholder="API Key e.g. 911945938763684"
-                                                />
-                                            </div>
-                                        </div>
-                                    )}
 
                                     {galleryFormData.imageUrl ? (
                                         <div className="image-preview-container">

@@ -27,13 +27,13 @@ const Facilities = () => {
                 const res = await api.get('/gallery?category=FACILITY')
                 const data = await res.json()
                 if (Array.isArray(data) && data.length > 0) {
-                    const mapped = data.map((item) => ({
+                    const customFacilities = data.map((item) => ({
                         icon: Building2,
                         title: item.title || 'Facility',
                         img: item.imageUrl,
                         desc: item.description || ''
                     }))
-                    setFacilitiesList(mapped)
+                    setFacilitiesList([...customFacilities, ...defaultFacilities])
                 }
             } catch (err) {
                 // Fallback to defaultFacilities
