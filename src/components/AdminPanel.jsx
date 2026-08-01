@@ -193,6 +193,7 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
     const [galleryImages, setGalleryImages] = useState([])
     const [galleryCategoryFilter, setGalleryCategoryFilter] = useState('ALL')
     const [isGalleryFormOpen, setIsGalleryFormOpen] = useState(false)
+    const [editingGalleryItem, setEditingGalleryItem] = useState(null)
     const [galleryFormData, setGalleryFormData] = useState({
         imageUrl: '',
         category: 'GENERAL',
@@ -435,12 +436,15 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
 
             const activeCloudName = cloudName || import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'dzckejmbq'
             const activePreset = uploadPreset || import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || 'rg_school_preset'
+            const targetFolder = galleryFormData.category 
+                ? `rajeev-gandhi-school/${galleryFormData.category.toLowerCase()}` 
+                : 'rajeev-gandhi-school'
 
             const widget = cloudinary.createUploadWidget(
                 {
                     cloudName: activeCloudName,
                     uploadPreset: activePreset,
-                    folder: 'rajeev-gandhi-school',
+                    folder: targetFolder,
                     clientAllowedFormats: ['jpg', 'png', 'webp', 'jpeg'],
                     maxFileSize: 5242880, // 5MB
                     multiple: false,
@@ -461,6 +465,31 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
         }
     }
 
+    const handleOpenGalleryForm = (item = null) => {
+        if (item) {
+            setEditingGalleryItem(item)
+            setGalleryFormData({
+                imageUrl: item.imageUrl || '',
+                category: item.category || 'GENERAL',
+                title: item.title || '',
+                description: item.description || '',
+                eventDate: item.eventDate || '',
+                displayOrder: item.displayOrder || 0,
+            })
+        } else {
+            setEditingGalleryItem(null)
+            setGalleryFormData({
+                imageUrl: '',
+                category: 'GENERAL',
+                title: '',
+                description: '',
+                eventDate: '',
+                displayOrder: 0,
+            })
+        }
+        setIsGalleryFormOpen(true)
+    }
+
     const handleSaveGalleryImage = async (e) => {
         e.preventDefault()
         if (!galleryFormData.imageUrl) {
@@ -479,7 +508,11 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
 
         if (isBackendConnected) {
             try {
-                await api.post('/gallery', payload)
+                if (editingGalleryItem) {
+                    await api.put(`/gallery/${editingGalleryItem.id}`, payload)
+                } else {
+                    await api.post('/gallery', payload)
+                }
                 await fetchGalleryImages()
             } catch (err) {
                 alert(`Backend Gallery Save Error: ${err.message}`)
@@ -487,13 +520,19 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
         } else {
             const saved = localStorage.getItem('rg_gallery_images')
             const list = saved !== null ? JSON.parse(saved) : initialMockGallery
-            const newItem = { id: Date.now(), ...payload }
-            const updated = [newItem, ...list]
+            let updated = []
+            if (editingGalleryItem) {
+                updated = list.map(item => item.id === editingGalleryItem.id ? { ...item, ...payload } : item)
+            } else {
+                const newItem = { id: Date.now(), ...payload }
+                updated = [newItem, ...list]
+            }
             localStorage.setItem('rg_gallery_images', JSON.stringify(updated))
             setGalleryImages(updated)
         }
 
         setIsGalleryFormOpen(false)
+        setEditingGalleryItem(null)
         setGalleryFormData({
             imageUrl: '',
             category: 'GENERAL',
@@ -1100,7 +1139,7 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                                         </button>
                                     </div>
                                     <div className="toolbar-right">
-                                        <button className="btn btn-primary btn-sm" onClick={() => setIsGalleryFormOpen(true)}>
+                                        <button className="btn btn-primary btn-sm" onClick={() => handleOpenGalleryForm()}>
                                             <Plus size={15} /> Add Gallery Image
                                         </button>
                                         <button className="btn-logout" onClick={() => setIsAuthenticated(false)} title="Logout">
@@ -1142,6 +1181,13 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                                                             <ArrowDown size={14} />
                                                         </button>
                                                     </div>
+                                                    <button
+                                                        className="icon-action-btn edit-btn"
+                                                        onClick={() => handleOpenGalleryForm(img)}
+                                                        title="Edit Image Details & Category"
+                                                    >
+                                                        <Edit2 size={15} />
+                                                    </button>
                                                     <button
                                                         className="icon-action-btn delete-btn"
                                                         onClick={() => handleDeleteGalleryImage(img.id)}
@@ -1481,7 +1527,7 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                             onClick={(e) => e.stopPropagation()}
                         >
                             <div className="form-modal-header">
-                                <h4>Add New Gallery Image</h4>
+                                <h4>{editingGalleryItem ? 'Edit Gallery Image' : 'Add New Gallery Image'}</h4>
                                 <button className="admin-close-icon" onClick={() => setIsGalleryFormOpen(false)}>
                                     <X size={16} />
                                 </button>
