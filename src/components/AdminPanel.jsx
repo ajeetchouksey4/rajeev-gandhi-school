@@ -98,16 +98,7 @@ const loadCloudinaryMediaLibraryScript = () => {
     })
 }
 
-const quickCloudinaryAssets = [
-    { name: 'Assembly / Picnic Ground (picnic_tvdsge)', url: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778130550/picnic_tvdsge.jpg' },
-    { name: 'Science Laboratory (lab_sdvj0y)', url: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778130550/lab_sdvj0y.jpg' },
-    { name: 'School Transport Bus (transport1_gql8sk)', url: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778570845/transport1_gql8sk.jpg' },
-    { name: 'Principal Desk PNG (principaldesk_rlj3ls)', url: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778130550/principaldesk_rlj3ls.png' },
-    { name: 'Principal Desk Photo (principal_ht1lxy)', url: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778130550/principal_ht1lxy.jpg' },
-    { name: 'School Inauguration (school-_inauguration_1)', url: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778130550/school-_inauguration_1.jpg' },
-    { name: 'Trophy Ceremony 1 (trophy1_bz0ht0)', url: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778142942/trophy1_bz0ht0.jpg' },
-    { name: 'Trophy Ceremony 3 (trophy3_vrtlrd)', url: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778142942/trophy3_vrtlrd.jpg' },
-]
+
 
 const initialMockEnquiries = [
     {
@@ -422,7 +413,7 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
     // Cloudinary credentials state
     const [cloudName, setCloudName] = useState(() => localStorage.getItem('rg_cloudinary_cloud_name') || import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'dzckejmbq')
     const [uploadPreset, setUploadPreset] = useState(() => localStorage.getItem('rg_cloudinary_preset') || import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || 'rg_school_preset')
-    const [apiKey, setApiKey] = useState(() => localStorage.getItem('rg_cloudinary_api_key') || import.meta.env.VITE_CLOUDINARY_API_KEY || '97188adfbc3d685c0c1aaae1eec81a')
+    const [apiKey, setApiKey] = useState(() => localStorage.getItem('rg_cloudinary_api_key') || import.meta.env.VITE_CLOUDINARY_API_KEY || '911945938763684')
     const [showCloudinarySettings, setShowCloudinarySettings] = useState(false)
 
     const handleSaveCloudinarySettings = (newCloudName, newPreset, newApiKey) => {
@@ -444,6 +435,7 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
 
             const activeCloudName = cloudName || import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'dzckejmbq'
             const activePreset = uploadPreset || import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || 'rg_school_preset'
+            const activeApiKey = apiKey || localStorage.getItem('rg_cloudinary_api_key') || '911945938763684'
             const targetFolder = galleryFormData.category 
                 ? `rajeev-gandhi-school/${galleryFormData.category.toLowerCase()}` 
                 : 'rajeev-gandhi-school'
@@ -451,7 +443,17 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
             const widget = cloudinary.createUploadWidget(
                 {
                     cloudName: activeCloudName,
+                    apiKey: activeApiKey,
                     uploadPreset: activePreset,
+                    uploadSignature: async (callback, paramsToSign) => {
+                        try {
+                            const res = await api.post('/gallery/cloudinary-signature', { paramsToSign })
+                            const data = await res.json()
+                            callback(data.signature)
+                        } catch (err) {
+                            console.error('Failed to fetch Cloudinary signature:', err)
+                        }
+                    },
                     folder: targetFolder,
                     clientAllowedFormats: ['jpg', 'png', 'webp', 'jpeg'],
                     maxFileSize: 5242880, // 5MB
@@ -481,7 +483,7 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                 return
             }
             const activeCloudName = cloudName || import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'dzckejmbq'
-            const activeApiKey = apiKey || localStorage.getItem('rg_cloudinary_api_key') || '97188adfbc3d685c0c1aaae1eec81a'
+            const activeApiKey = apiKey || localStorage.getItem('rg_cloudinary_api_key') || '911945938763684'
 
             cloudinary.openMediaLibrary(
                 {
@@ -1634,42 +1636,16 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                                                 />
                                             </div>
                                             <div className="form-group margin-top-xs">
-                                                <label className="text-xs">API Key (For Media Library)</label>
+                                                <label className="text-xs">API Key (Signed System)</label>
                                                 <input
                                                     type="text"
                                                     value={apiKey}
                                                     onChange={(e) => handleSaveCloudinarySettings(cloudName, uploadPreset, e.target.value)}
-                                                    placeholder="API Key e.g. 97188adfbc3d685c0c1aaae1eec81a"
+                                                    placeholder="API Key e.g. 911945938763684"
                                                 />
                                             </div>
                                         </div>
                                     )}
-
-                                    {/* Quick Selector for Account Assets */}
-                                    <div className="form-group margin-top-sm">
-                                        <label className="text-xs">Or Pick From Your Existing Account Assets:</label>
-                                        <select
-                                            className="filter-select select-full-width"
-                                            onChange={(e) => {
-                                                if (e.target.value) {
-                                                    const selected = quickCloudinaryAssets.find(a => a.url === e.target.value)
-                                                    setGalleryFormData(prev => ({
-                                                        ...prev,
-                                                        imageUrl: e.target.value,
-                                                        title: prev.title || (selected ? selected.name.split(' (')[0] : '')
-                                                    }))
-                                                }
-                                            }}
-                                            defaultValue=""
-                                        >
-                                            <option value="" disabled>-- Select an existing Cloudinary asset --</option>
-                                            {quickCloudinaryAssets.map((asset, idx) => (
-                                                <option key={idx} value={asset.url}>
-                                                    {asset.name}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
 
                                     {galleryFormData.imageUrl ? (
                                         <div className="image-preview-container">
