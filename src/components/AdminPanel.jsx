@@ -31,15 +31,13 @@ import {
     Image as ImageIcon,
     UploadCloud,
     GripVertical,
-    ChevronLeft,
-    ChevronRight,
     ArrowLeft,
     ArrowRight,
     Settings,
     Home,
     Building2,
     Sparkles,
-    Layers
+    Check
 } from 'lucide-react'
 import {
     ResponsiveContainer,
@@ -57,23 +55,30 @@ const categories = ['Admissions', 'Exams', 'Academic', 'Events', 'Circulars']
 const badges = ['URGENT', 'IMPORTANT', 'NOTICE', 'EVENT', 'MEETING']
 const statusOptions = ['ALL', 'NEW', 'CONTACTED', 'ENROLLED', 'CLOSED']
 const categoryFilterOptions = ['ALL', 'ADMISSION', 'GENERAL', 'CAREER', 'BUSINESS']
-const galleryCategoryOptions = ['Events', 'Activities', 'Sports', 'Celebrations', 'Academics', 'Infrastructure', 'General']
+const galleryCategoryOptions = ['Events', 'Activities', 'Sports', 'Celebrations', 'Academics', 'Facilities', 'General']
 
 const defaultGallerySeed = [
     // Facilities Section Photos
-    { id: 101, title: 'Science Labs', category: 'Facilities', section: 'FACILITIES', imageUrl: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778130550/lab_sdvj0y.jpg', displayOrder: 1 },
-    { id: 102, title: 'Transport', category: 'Facilities', section: 'FACILITIES', imageUrl: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778570845/transport1_gql8sk.jpg', displayOrder: 2 },
+    { id: 101, title: 'Smart Classrooms', category: 'Facilities', section: 'FACILITIES', imageUrl: 'https://images.unsplash.com/photo-1562774053-701939374585?w=500&q=80', displayOrder: 1 },
+    { id: 102, title: 'Science Labs', category: 'Facilities', section: 'FACILITIES', imageUrl: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778130550/lab_sdvj0y.jpg', displayOrder: 2 },
+    { id: 103, title: 'Library', category: 'Facilities', section: 'FACILITIES', imageUrl: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=500&q=80', displayOrder: 3 },
+    { id: 104, title: 'Sports Complex', category: 'Facilities', section: 'FACILITIES', imageUrl: 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=500&q=80', displayOrder: 4 },
+    { id: 105, title: 'Computer Lab', category: 'Facilities', section: 'FACILITIES', imageUrl: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=500&q=80', displayOrder: 5 },
+    { id: 106, title: 'Transport', category: 'Facilities', section: 'FACILITIES', imageUrl: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778570845/transport1_gql8sk.jpg', displayOrder: 6 },
 
-    // Highlights Section Photos
-    { id: 201, title: 'Sports Day Championship', category: 'Highlights', section: 'HIGHLIGHTS', imageUrl: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778142942/trophy1_bz0ht0.jpg', displayOrder: 1 },
-    { id: 202, title: 'Republic Day Parade', category: 'Highlights', section: 'HIGHLIGHTS', imageUrl: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778130962/independence5_ku7v2n.jpg', displayOrder: 2 },
+    // School Highlights Section Photos
+    { id: 201, title: 'Annual Day Celebration', category: 'Events', section: 'HIGHLIGHTS', imageUrl: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778142942/trophy1_bz0ht0.jpg', displayOrder: 1 },
+    { id: 202, title: 'Sports Day Championship', category: 'Sports', section: 'HIGHLIGHTS', imageUrl: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778142942/trophy3_vrtlrd.jpg', displayOrder: 2 },
+    { id: 203, title: 'Science Exhibition', category: 'Academics', section: 'HIGHLIGHTS', imageUrl: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778130550/lab_sdvj0y.jpg', displayOrder: 3 },
+    { id: 204, title: 'Republic Day Parade', category: 'Celebrations', section: 'HIGHLIGHTS', imageUrl: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778130962/independence5_ku7v2n.jpg', displayOrder: 4 },
 
-    // Main Photo Gallery Photos
+    // Main Photo Gallery Section Photos
     { id: 301, title: 'Annual Day Celebration', category: 'Events', section: 'GALLERY', imageUrl: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778142942/trophy1_bz0ht0.jpg', wide: true, displayOrder: 1 },
     { id: 302, title: 'Yoga Day', category: 'Activities', section: 'GALLERY', imageUrl: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778130623/assembly2_lu2rg4.jpg', wide: false, displayOrder: 2 },
     { id: 303, title: 'Sports Day', category: 'Sports', section: 'GALLERY', imageUrl: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778142942/trophy3_vrtlrd.jpg', wide: false, displayOrder: 3 },
     { id: 304, title: 'Independence Day', category: 'Celebrations', section: 'GALLERY', imageUrl: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778130962/independence6_kgjyx0.jpg', wide: false, displayOrder: 4 },
     { id: 305, title: 'Science Exhibition', category: 'Academics', section: 'GALLERY', imageUrl: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778130550/lab_sdvj0y.jpg', wide: true, displayOrder: 5 },
+    { id: 306, title: 'Republic Day', category: 'Celebrations', section: 'GALLERY', imageUrl: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778130962/independence5_ku7v2n.jpg', wide: false, displayOrder: 6 },
 ]
 
 const initialMockEnquiries = [
@@ -102,6 +107,19 @@ const initialMockEnquiries = [
         status: 'CONTACTED',
         isRead: true,
         createdAt: '2026-07-30T14:15:00',
+    },
+    {
+        id: 103,
+        category: 'CAREER',
+        studentName: '',
+        parentName: 'Priya Mehta',
+        parentPhone: '9123456789',
+        parentEmail: 'priya.m@example.com',
+        classApplyingFor: '',
+        message: 'Applying for Senior PGT Mathematics Teacher position. Have 6 years MP Board experience.',
+        status: 'NEW',
+        isRead: false,
+        createdAt: '2026-07-29T11:20:00',
     }
 ]
 
@@ -172,6 +190,25 @@ const AdminPanel = ({ onDataChange }) => {
         wide: false,
         displayOrder: 0
     })
+
+    // Helper: Normalize & ensure photos exist for all sections
+    const ensureSectionCoverage = (items) => {
+        let normalized = [...items]
+        const hasFac = normalized.some(i => i.section === 'FACILITIES')
+        const hasHigh = normalized.some(i => i.section === 'HIGHLIGHTS')
+        const hasGal = normalized.some(i => !i.section || i.section === 'GALLERY')
+
+        if (!hasFac) {
+            normalized = [...normalized, ...defaultGallerySeed.filter(i => i.section === 'FACILITIES')]
+        }
+        if (!hasHigh) {
+            normalized = [...normalized, ...defaultGallerySeed.filter(i => i.section === 'HIGHLIGHTS')]
+        }
+        if (!hasGal) {
+            normalized = [...normalized, ...defaultGallerySeed.filter(i => i.section === 'GALLERY')]
+        }
+        return normalized
+    }
 
     // Fetch announcements
     const fetchAnnouncements = async () => {
@@ -258,9 +295,10 @@ const AdminPanel = ({ onDataChange }) => {
             const res = await api.get('/gallery')
             const data = await res.json()
             if (Array.isArray(data) && data.length > 0) {
-                setGalleryItems(data)
+                const enriched = ensureSectionCoverage(data)
+                setGalleryItems(enriched)
                 setIsBackendConnected(true)
-                localStorage.setItem('rg_gallery', JSON.stringify(data))
+                localStorage.setItem('rg_gallery', JSON.stringify(enriched))
                 window.dispatchEvent(new Event('rg_gallery_updated'))
                 setLoading(false)
                 return
@@ -275,7 +313,8 @@ const AdminPanel = ({ onDataChange }) => {
             try {
                 const parsed = JSON.parse(saved)
                 if (Array.isArray(parsed) && parsed.length > 0) {
-                    setGalleryItems(parsed)
+                    const enriched = ensureSectionCoverage(parsed)
+                    setGalleryItems(enriched)
                     setLoading(false)
                     return
                 }
@@ -283,9 +322,114 @@ const AdminPanel = ({ onDataChange }) => {
                 console.error(e)
             }
         }
+
         setGalleryItems(defaultGallerySeed)
         localStorage.setItem('rg_gallery', JSON.stringify(defaultGallerySeed))
+        window.dispatchEvent(new Event('rg_gallery_updated'))
         setLoading(false)
+    }
+
+    // Fetch analytics
+    const fetchAnalytics = async (range = analyticsRange, catScope = analyticsCategoryScope) => {
+        try {
+            const res = await api.get(`/enquiries/analytics?range=${range}&category=${catScope}`)
+            const data = await res.json()
+            setAnalyticsData(data)
+        } catch (err) {
+            const saved = localStorage.getItem('rg_enquiries')
+            const rawList = saved !== null ? JSON.parse(saved) : initialMockEnquiries
+            const list = catScope && catScope !== 'ALL'
+                ? rawList.filter(e => (e.category || 'ADMISSION') === catScope)
+                : rawList
+
+            const total = list.length
+            const statusBreakdown = {
+                NEW: list.filter(e => e.status === 'NEW').length,
+                CONTACTED: list.filter(e => e.status === 'CONTACTED').length,
+                ENROLLED: list.filter(e => e.status === 'ENROLLED').length,
+                CLOSED: list.filter(e => e.status === 'CLOSED').length,
+            }
+            const categoryBreakdown = {
+                ADMISSION: rawList.filter(e => (e.category || 'ADMISSION') === 'ADMISSION').length,
+                GENERAL: rawList.filter(e => e.category === 'GENERAL').length,
+                CAREER: rawList.filter(e => e.category === 'CAREER').length,
+                BUSINESS: rawList.filter(e => e.category === 'BUSINESS').length,
+            }
+            
+            let timeline = []
+            if (range === 'year') {
+                timeline = [
+                    { label: 'May 2026', count: 4 },
+                    { label: 'Jun 2026', count: 12 },
+                    { label: 'Jul 2026', count: total },
+                ]
+            } else if (range === 'month') {
+                timeline = [
+                    { label: 'W1 (07 Jul)', count: 2 },
+                    { label: 'W2 (14 Jul)', count: 5 },
+                    { label: 'W3 (21 Jul)', count: 8 },
+                    { label: 'W4 (28 Jul)', count: total },
+                ]
+            } else {
+                timeline = [
+                    { label: 'Mon', count: 1 },
+                    { label: 'Tue', count: 3 },
+                    { label: 'Wed', count: 2 },
+                    { label: 'Thu', count: 4 },
+                    { label: 'Fri', count: total },
+                ]
+            }
+            setAnalyticsData({ total, statusBreakdown, categoryBreakdown, timeline })
+        }
+    }
+
+    const handleExportCSV = (onlyAdmissions = false) => {
+        if (!enquiries || enquiries.length === 0) {
+            alert('No enquiries available to export.')
+            return
+        }
+
+        const targetList = onlyAdmissions 
+            ? enquiries.filter(e => (e.category || 'ADMISSION') === 'ADMISSION')
+            : enquiries
+
+        if (targetList.length === 0) {
+            alert(onlyAdmissions ? 'No admission enquiries found to export.' : 'No enquiries found to export.')
+            return
+        }
+
+        const headers = ['ID', 'Category', 'Student Name', 'Parent / Contact Name', 'Phone', 'Email', 'Class Applied For', 'Message', 'Status', 'Date']
+        
+        const rows = targetList.map(enq => [
+            enq.id || '',
+            enq.category || 'ADMISSION',
+            enq.studentName || 'N/A',
+            enq.parentName || '',
+            enq.parentPhone || enq.phone || '',
+            enq.parentEmail || '',
+            enq.classApplyingFor || enq.classAppliedFor || 'N/A',
+            (enq.message || '').replace(/"/g, '""').replace(/\n/g, ' '),
+            enq.status || 'NEW',
+            enq.createdAt ? new Date(enq.createdAt).toLocaleString() : ''
+        ])
+
+        const csvContent = [
+            headers.join(','),
+            ...rows.map(e => e.map(val => `"${val}"`).join(','))
+        ].join('\n')
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+        const url = URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        const filename = onlyAdmissions 
+            ? `admissions_enquiries_${new Date().toISOString().slice(0, 10)}.csv`
+            : `all_enquiries_${new Date().toISOString().slice(0, 10)}.csv`
+
+        link.setAttribute('href', url)
+        link.setAttribute('download', filename)
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
     }
 
     useEffect(() => {
@@ -295,6 +439,12 @@ const AdminPanel = ({ onDataChange }) => {
             fetchGallery()
         }
     }, [isAuthenticated, categoryFilter, statusFilter, searchQuery])
+
+    useEffect(() => {
+        if (isAnalyticsOpen) {
+            fetchAnalytics(analyticsRange, analyticsCategoryScope)
+        }
+    }, [isAnalyticsOpen, analyticsRange, analyticsCategoryScope])
 
     const handleLogin = async (e) => {
         e.preventDefault()
@@ -337,6 +487,165 @@ const AdminPanel = ({ onDataChange }) => {
     const handleLogout = () => {
         setIsAuthenticated(false)
         sessionStorage.removeItem('rg_admin_auth')
+    }
+
+    const handleOpenDetail = async (item) => {
+        setSelectedEnquiry(item)
+        setIsDetailOpen(true)
+
+        if (!item.isRead) {
+            if (isBackendConnected) {
+                try {
+                    await api.get(`/enquiries/${item.id}`)
+                    fetchEnquiries()
+                } catch (err) {
+                    console.error(err)
+                }
+            } else {
+                const saved = localStorage.getItem('rg_enquiries')
+                const list = saved !== null ? JSON.parse(saved) : initialMockEnquiries
+                const updated = list.map(e => e.id === item.id ? { ...e, isRead: true } : e)
+                localStorage.setItem('rg_enquiries', JSON.stringify(updated))
+                setEnquiries(prev => prev.map(e => e.id === item.id ? { ...e, isRead: true } : e))
+                setUnreadCount(prev => Math.max(0, prev - 1))
+            }
+        }
+    }
+
+    const handleStatusChange = async (id, newStatus) => {
+        if (isBackendConnected) {
+            try {
+                await api.patch(`/enquiries/${id}/status`, { status: newStatus })
+                fetchEnquiries()
+                if (selectedEnquiry && selectedEnquiry.id === id) {
+                    setSelectedEnquiry(prev => ({ ...prev, status: newStatus }))
+                }
+            } catch (err) {
+                alert(`Error updating status: ${err.message}`)
+            }
+        } else {
+            const saved = localStorage.getItem('rg_enquiries')
+            const list = saved !== null ? JSON.parse(saved) : initialMockEnquiries
+            const updated = list.map(e => e.id === id ? { ...e, status: newStatus } : e)
+            localStorage.setItem('rg_enquiries', JSON.stringify(updated))
+            setEnquiries(prev => prev.map(e => e.id === id ? { ...e, status: newStatus } : e))
+            if (selectedEnquiry && selectedEnquiry.id === id) {
+                setSelectedEnquiry(prev => ({ ...prev, status: newStatus }))
+            }
+        }
+    }
+
+    const openWhatsApp = (enquiry) => {
+        const phone = (enquiry.parentPhone || enquiry.phone || '').replace(/\D/g, '')
+        const formattedPhone = phone.length === 10 ? `91${phone}` : phone
+        const name = enquiry.parentName || enquiry.studentName || 'there'
+        const isAdmission = (enquiry.category || 'ADMISSION') === 'ADMISSION'
+        const studentName = enquiry.studentName || 'your child'
+        const classAppliedFor = enquiry.classApplyingFor || enquiry.classAppliedFor || 'our school'
+
+        let text = ''
+        if (isAdmission) {
+            text = `Hi ${name}, thank you for your enquiry about admission for ${studentName} in ${classAppliedFor}. We'd love to help — let us know a good time to talk.`
+        } else {
+            text = `Hi ${name}, thank you for reaching out to Rajeev Gandhi Convent School regarding your enquiry (${enquiry.category || 'General'}). How can we assist you today?`
+        }
+
+        const url = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(text)}`
+        window.open(url, '_blank')
+    }
+
+    // Announcement Handlers
+    const handleOpenForm = (item = null) => {
+        if (item) {
+            setEditingItem(item)
+            setFormData({
+                title: item.title,
+                category: item.category,
+                badge: item.badge || 'NOTICE',
+                date: item.date || new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+                description: item.description,
+                isPinned: item.isPinned || false,
+            })
+        } else {
+            setEditingItem(null)
+            setFormData({
+                title: '',
+                category: 'Admissions',
+                badge: 'NOTICE',
+                date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+                description: '',
+                isPinned: false,
+            })
+        }
+        setIsFormOpen(true)
+    }
+
+    const handleSaveNotice = async (e) => {
+        e.preventDefault()
+        if (!formData.title || !formData.description) return
+
+        if (isBackendConnected) {
+            try {
+                if (editingItem) {
+                    await api.put(`/announcements/${editingItem.id}`, formData)
+                } else {
+                    await api.post('/announcements', formData)
+                }
+                await fetchAnnouncements()
+            } catch (err) {
+                alert(`Backend Save Error: ${err.message}`)
+            }
+        } else {
+            let updatedList = []
+            if (editingItem) {
+                updatedList = announcements.map((item) =>
+                    item.id === editingItem.id ? { ...item, ...formData } : item
+                )
+            } else {
+                const newItem = { id: Date.now(), ...formData }
+                updatedList = [newItem, ...announcements]
+            }
+            setAnnouncements(updatedList)
+            localStorage.setItem('rg_announcements', JSON.stringify(updatedList))
+            if (onDataChange) onDataChange(updatedList)
+        }
+
+        setIsFormOpen(false)
+    }
+
+    const handleDeleteNotice = async (id) => {
+        if (!window.confirm('Are you sure you want to delete this announcement?')) return
+
+        if (isBackendConnected) {
+            try {
+                await api.delete(`/announcements/${id}`)
+                await fetchAnnouncements()
+            } catch (err) {
+                alert(`Backend Delete Error: ${err.message}`)
+            }
+        } else {
+            const updatedList = announcements.filter((item) => item.id !== id)
+            setAnnouncements(updatedList)
+            localStorage.setItem('rg_announcements', JSON.stringify(updatedList))
+            if (onDataChange) onDataChange(updatedList)
+        }
+    }
+
+    const handleTogglePin = async (item) => {
+        const updated = { ...item, isPinned: !item.isPinned }
+        if (isBackendConnected) {
+            try {
+                await api.put(`/announcements/${item.id}`, updated)
+                await fetchAnnouncements()
+            } catch (err) {
+                console.error(err)
+            }
+        } else {
+            const updatedList = announcements.map((i) => (i.id === item.id ? updated : i))
+            setAnnouncements(updatedList)
+            localStorage.setItem('rg_announcements', JSON.stringify(updatedList))
+            if (onDataChange) onDataChange(updatedList)
+        }
     }
 
     // ==========================================
@@ -408,7 +717,7 @@ const AdminPanel = ({ onDataChange }) => {
                 setUploadError(result.error?.message || 'Cloudinary upload failed. Check your Cloud Name & Unsigned Upload Preset.')
             }
         } catch (err) {
-            setUploadError(`Upload network error: ${err.message}. If using Cloudinary public storage, ensure your Upload Preset allows unsigned uploads.`)
+            setUploadError(`Upload network error: ${err.message}. Ensure Cloud Name & Upload Preset permit unsigned direct uploads.`)
         } finally {
             setIsUploading(false)
         }
@@ -472,7 +781,6 @@ const AdminPanel = ({ onDataChange }) => {
         }
     }
 
-    // Reorder items within a specific section
     const handleReorderSection = async (sectionName, newSectionItems) => {
         const otherItems = galleryItems.filter(item => (item.section || 'GALLERY') !== sectionName)
         const reorderedSectionItems = newSectionItems.map((item, idx) => ({
@@ -496,7 +804,6 @@ const AdminPanel = ({ onDataChange }) => {
         }
     }
 
-    // Swap item left/right in section
     const swapItemPosition = (sectionName, itemIndex, delta) => {
         const sectionItems = galleryItems.filter(item => (item.section || 'GALLERY') === sectionName)
         const targetIndex = itemIndex + delta
@@ -541,7 +848,8 @@ const AdminPanel = ({ onDataChange }) => {
                     <div className="admin-nav-actions">
                         {isAuthenticated && (
                             <div className={`backend-status-pill ${isBackendConnected ? 'connected' : 'offline'}`}>
-                                {isBackendConnected ? <Wifi size={13} /> : <WifiOff size={13} />}
+                                <span className="status-dot-pulse" />
+                                <Wifi size={14} />
                                 <span>{isBackendConnected ? 'Backend Live' : 'Offline Mode'}</span>
                             </div>
                         )}
@@ -610,7 +918,7 @@ const AdminPanel = ({ onDataChange }) => {
                             </button>
                         </div>
 
-                        {/* ENQUIRIES TAB CONTENT */}
+                        {/* RESTORED FULL ENQUIRIES TAB CONTENT */}
                         {activeTab === 'enquiries' && (
                             <div className="tab-pane">
                                 <div className="dashboard-toolbar">
@@ -619,7 +927,7 @@ const AdminPanel = ({ onDataChange }) => {
                                             <Search size={15} className="search-icon" />
                                             <input
                                                 type="text"
-                                                placeholder="Search name, phone..."
+                                                placeholder="Search name, phone, details..."
                                                 value={searchQuery}
                                                 onChange={(e) => setSearchQuery(e.target.value)}
                                             />
@@ -629,9 +937,12 @@ const AdminPanel = ({ onDataChange }) => {
                                             className="filter-select"
                                             value={categoryFilter}
                                             onChange={(e) => setCategoryFilter(e.target.value)}
+                                            title="Filter by Purpose Category"
                                         >
                                             {categoryFilterOptions.map(cat => (
-                                                <option key={cat} value={cat}>{cat === 'ALL' ? 'All Categories' : cat}</option>
+                                                <option key={cat} value={cat}>
+                                                    {cat === 'ALL' ? 'All Categories' : cat}
+                                                </option>
                                             ))}
                                         </select>
 
@@ -639,18 +950,41 @@ const AdminPanel = ({ onDataChange }) => {
                                             className="filter-select"
                                             value={statusFilter}
                                             onChange={(e) => setStatusFilter(e.target.value)}
+                                            title="Filter by Status"
                                         >
                                             {statusOptions.map(st => (
-                                                <option key={st} value={st}>{st === 'ALL' ? 'All Statuses' : st}</option>
+                                                <option key={st} value={st}>
+                                                    {st === 'ALL' ? 'All Statuses' : st}
+                                                </option>
                                             ))}
                                         </select>
 
-                                        <button className="refresh-btn" onClick={fetchEnquiries}>
+                                        <button className="refresh-btn" onClick={fetchEnquiries} title="Refresh Enquiries">
                                             <RefreshCw size={13} className={loading ? 'spin' : ''} />
                                         </button>
                                     </div>
 
                                     <div className="toolbar-right">
+                                        <button
+                                            className="btn btn-secondary btn-sm"
+                                            onClick={() => handleExportCSV(true)}
+                                            title="Export Admissions Only to Excel"
+                                        >
+                                            <FileSpreadsheet size={15} /> Export Admissions
+                                        </button>
+                                        <button
+                                            className="btn btn-secondary btn-sm"
+                                            onClick={() => handleExportCSV(false)}
+                                            title="Export All Enquiries to Excel"
+                                        >
+                                            <Download size={15} /> Export All
+                                        </button>
+                                        <button
+                                            className={`btn btn-secondary btn-sm ${isAnalyticsOpen ? 'active-analytics' : ''}`}
+                                            onClick={() => setIsAnalyticsOpen(true)}
+                                        >
+                                            <BarChart2 size={15} /> Analytics
+                                        </button>
                                         <button className="btn-logout" onClick={handleLogout} title="Logout">
                                             <LogOut size={15} />
                                         </button>
@@ -659,43 +993,146 @@ const AdminPanel = ({ onDataChange }) => {
 
                                 <div className="admin-enquiries-list">
                                     {enquiries.length > 0 ? (
-                                        enquiries.map((enq) => (
-                                            <div key={enq.id} className="admin-enquiry-card">
-                                                <div className="enquiry-card-header">
-                                                    <h5>{enq.parentName || enq.studentName || 'Visitor'}</h5>
-                                                    <span className="status-pill status-new">{enq.status || 'NEW'}</span>
+                                        enquiries.map((enq) => {
+                                            const isUnread = !enq.isRead
+                                            const cat = enq.category || 'ADMISSION'
+                                            return (
+                                                <div
+                                                    key={enq.id}
+                                                    className={`admin-enquiry-card ${isUnread ? 'unread' : ''}`}
+                                                    onClick={() => handleOpenDetail(enq)}
+                                                >
+                                                    <div className="enquiry-card-header">
+                                                        <div className="student-info">
+                                                            {isUnread && <span className="unread-dot" title="Unread Enquiry" />}
+                                                            <span className={`category-badge-chip cat-${cat.toLowerCase()}`}>
+                                                                {cat}
+                                                            </span>
+                                                            <h5 className={isUnread ? 'bold-text' : ''}>
+                                                                {enq.parentName || enq.studentName || 'Visitor'}
+                                                            </h5>
+                                                            {cat === 'ADMISSION' && enq.studentName && (
+                                                                <span className="parent-subtext">
+                                                                    Student: <strong>{enq.studentName}</strong>
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                        <div className="card-right-group">
+                                                            <span className={`status-pill status-${(enq.status || 'NEW').toLowerCase()}`}>
+                                                                {enq.status || 'NEW'}
+                                                            </span>
+                                                            <button
+                                                                className="whatsapp-btn-sm"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation()
+                                                                    openWhatsApp(enq)
+                                                                }}
+                                                                title="Open WhatsApp Chat"
+                                                            >
+                                                                <Send size={13} /> WhatsApp
+                                                            </button>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="enquiry-card-details">
+                                                        {cat === 'ADMISSION' && (enq.classApplyingFor || enq.classAppliedFor) && (
+                                                            <span><GraduationCap size={13} /> Class: <strong>{enq.classApplyingFor || enq.classAppliedFor}</strong></span>
+                                                        )}
+                                                        <span><PhoneCall size={13} /> {enq.parentPhone || enq.phone}</span>
+                                                        {enq.createdAt && (
+                                                            <span><Clock size={13} /> {new Date(enq.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}</span>
+                                                        )}
+                                                    </div>
+
+                                                    {enq.message && (
+                                                        <p className="enquiry-msg-snippet">{enq.message}</p>
+                                                    )}
                                                 </div>
-                                                <p className="enquiry-msg-snippet">{enq.message}</p>
-                                            </div>
-                                        ))
+                                            )
+                                        })
                                     ) : (
                                         <div className="admin-empty-state">
                                             <AlertCircle size={30} />
-                                            <p>No enquiries found.</p>
+                                            <p>No enquiries found matching your filter criteria.</p>
                                         </div>
                                     )}
                                 </div>
                             </div>
                         )}
 
-                        {/* ANNOUNCEMENTS TAB CONTENT */}
+                        {/* RESTORED FULL ANNOUNCEMENTS TAB CONTENT */}
                         {activeTab === 'notices' && (
                             <div className="tab-pane">
                                 <div className="dashboard-toolbar">
-                                    <h4>Announcements</h4>
-                                    <button className="btn btn-primary btn-sm" onClick={() => handleOpenForm()}>
-                                        <Plus size={15} /> Add Notice
-                                    </button>
+                                    <div className="toolbar-left">
+                                        <h4>Announcement Manager ({announcements.length})</h4>
+                                        <button className="refresh-btn" onClick={fetchAnnouncements} title="Refresh Data">
+                                            <RefreshCw size={13} className={loading ? 'spin' : ''} />
+                                        </button>
+                                    </div>
+                                    <div className="toolbar-right">
+                                        <button className="btn btn-primary btn-sm" onClick={() => handleOpenForm()}>
+                                            <Plus size={15} /> Add Notice
+                                        </button>
+                                        <button className="btn-logout" onClick={handleLogout} title="Logout">
+                                            <LogOut size={15} />
+                                        </button>
+                                    </div>
                                 </div>
+
                                 <div className="admin-notices-table">
-                                    {announcements.map((item) => (
-                                        <div key={item.id} className="admin-notice-item">
-                                            <div>
-                                                <h5>{item.title}</h5>
-                                                <p className="item-desc-preview">{item.description}</p>
-                                            </div>
+                                    {announcements.length > 0 ? (
+                                        [...announcements]
+                                            .sort((a, b) => {
+                                                const pinA = a.isPinned ? 1 : 0
+                                                const pinB = b.isPinned ? 1 : 0
+                                                if (pinA !== pinB) return pinB - pinA
+                                                return (b.id || 0) - (a.id || 0)
+                                            })
+                                            .map((item) => (
+                                                <div key={item.id} className={`admin-notice-item ${item.isPinned ? 'pinned' : ''}`}>
+                                                    <div className="item-main">
+                                                        <div className="item-meta">
+                                                            <span className={`badge-chip tag-${item.category.toLowerCase()}`}>
+                                                                {item.badge || 'NOTICE'}
+                                                            </span>
+                                                            <span className="item-category-label">{item.category}</span>
+                                                            <span className="item-date">{item.date}</span>
+                                                        </div>
+                                                        <h5 className="item-title">{item.title}</h5>
+                                                        <p className="item-desc-preview">{item.description}</p>
+                                                    </div>
+                                                    <div className="item-actions">
+                                                        <button
+                                                            className={`pin-btn ${item.isPinned ? 'pinned' : ''}`}
+                                                            onClick={() => handleTogglePin(item)}
+                                                            title={item.isPinned ? 'Unpin Notice' : 'Pin Notice'}
+                                                        >
+                                                            <Pin size={15} />
+                                                        </button>
+                                                        <button
+                                                            className="edit-btn"
+                                                            onClick={() => handleOpenForm(item)}
+                                                            title="Edit Notice"
+                                                        >
+                                                            <Edit2 size={15} />
+                                                        </button>
+                                                        <button
+                                                            className="delete-btn"
+                                                            onClick={() => handleDeleteNotice(item.id)}
+                                                            title="Delete Notice"
+                                                        >
+                                                            <Trash2 size={15} />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ))
+                                    ) : (
+                                        <div className="admin-empty-state">
+                                            <AlertCircle size={30} />
+                                            <p>No announcements found.</p>
                                         </div>
-                                    ))}
+                                    )}
                                 </div>
                             </div>
                         )}
@@ -762,7 +1199,6 @@ const AdminPanel = ({ onDataChange }) => {
                                                         <span className="cat-tag">{img.category || 'Facilities'}</span>
                                                     </div>
 
-                                                    {/* Swap Arrow Controls */}
                                                     <div className="swap-controls">
                                                         <button
                                                             className="swap-btn"
@@ -960,7 +1396,282 @@ const AdminPanel = ({ onDataChange }) => {
                 )}
             </div>
 
-            {/* UPLOAD / EDIT PHOTO MODAL (FIXED OVERFLOW FROM TOP & BOTTOM) */}
+            {/* ENQUIRY DETAIL MODAL */}
+            <AnimatePresence>
+                {isDetailOpen && selectedEnquiry && (
+                    <div className="form-modal-backdrop" onClick={() => setIsDetailOpen(false)}>
+                        <motion.div
+                            className="form-modal-card enquiry-detail-modal"
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="form-modal-header">
+                                <div>
+                                    <span className={`category-badge-chip cat-${(selectedEnquiry.category || 'ADMISSION').toLowerCase()}`}>
+                                        {selectedEnquiry.category || 'ADMISSION'}
+                                    </span>
+                                    <h4>Enquiry Details #{selectedEnquiry.id}</h4>
+                                </div>
+                                <button className="admin-close-icon" onClick={() => setIsDetailOpen(false)}>
+                                    <X size={16} />
+                                </button>
+                            </div>
+
+                            <div className="enquiry-modal-body">
+                                <div className="info-grid">
+                                    <div className="info-item">
+                                        <label>Contact Name</label>
+                                        <p>{selectedEnquiry.parentName || selectedEnquiry.studentName || 'Visitor'}</p>
+                                    </div>
+
+                                    {(selectedEnquiry.category || 'ADMISSION') === 'ADMISSION' && (
+                                        <>
+                                            <div className="info-item">
+                                                <label>Student Name</label>
+                                                <p>{selectedEnquiry.studentName || 'N/A'}</p>
+                                            </div>
+                                            <div className="info-item">
+                                                <label>Class Applying For</label>
+                                                <p>{selectedEnquiry.classApplyingFor || selectedEnquiry.classAppliedFor || 'N/A'}</p>
+                                            </div>
+                                        </>
+                                    )}
+
+                                    <div className="info-item">
+                                        <label>Phone Number</label>
+                                        <p>{selectedEnquiry.parentPhone || selectedEnquiry.phone || 'N/A'}</p>
+                                    </div>
+
+                                    <div className="info-item">
+                                        <label>Email Address</label>
+                                        <p>{selectedEnquiry.parentEmail || selectedEnquiry.email || 'N/A'}</p>
+                                    </div>
+
+                                    <div className="info-item">
+                                        <label>Submitted Date</label>
+                                        <p>{selectedEnquiry.createdAt ? new Date(selectedEnquiry.createdAt).toLocaleString() : 'N/A'}</p>
+                                    </div>
+
+                                    <div className="info-item">
+                                        <label>Current Status</label>
+                                        <select
+                                            value={selectedEnquiry.status || 'NEW'}
+                                            onChange={(e) => handleStatusChange(selectedEnquiry.id, e.target.value)}
+                                            className="modal-status-select"
+                                        >
+                                            {statusOptions.filter(s => s !== 'ALL').map(st => (
+                                                <option key={st} value={st}>{st}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div className="info-item full-width">
+                                    <label>Message / Notes</label>
+                                    <div className="message-box">{selectedEnquiry.message || 'No additional details provided.'}</div>
+                                </div>
+                            </div>
+
+                            <div className="form-actions space-between">
+                                <button className="whatsapp-btn-lg" onClick={() => openWhatsApp(selectedEnquiry)}>
+                                    <Send size={15} /> Chat on WhatsApp
+                                </button>
+                                <button className="btn btn-outline" onClick={() => setIsDetailOpen(false)}>
+                                    Close
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* ANALYTICS MODAL */}
+            <AnimatePresence>
+                {isAnalyticsOpen && (
+                    <div className="form-modal-backdrop" onClick={() => setIsAnalyticsOpen(false)}>
+                        <motion.div
+                            className="form-modal-card analytics-modal"
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="form-modal-header">
+                                <div>
+                                    <h4>Enquiry Analytics & Insights</h4>
+                                    <p className="sub-text">Overview of parent enquiries and conversion performance</p>
+                                </div>
+                                <button className="admin-close-icon" onClick={() => setIsAnalyticsOpen(false)}>
+                                    <X size={16} />
+                                </button>
+                            </div>
+
+                            <div className="analytics-modal-body">
+                                <div className="analytics-controls">
+                                    <div className="time-range-toggle">
+                                        <button
+                                            className={analyticsRange === 'week' ? 'active' : ''}
+                                            onClick={() => setAnalyticsRange('week')}
+                                        >
+                                            This Week
+                                        </button>
+                                        <button
+                                            className={analyticsRange === 'month' ? 'active' : ''}
+                                            onClick={() => setAnalyticsRange('month')}
+                                        >
+                                            This Month
+                                        </button>
+                                        <button
+                                            className={analyticsRange === 'year' ? 'active' : ''}
+                                            onClick={() => setAnalyticsRange('year')}
+                                        >
+                                            This Year
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div className="analytics-summary-card">
+                                    <h5>
+                                        Period Total: <strong>{analyticsData.total || 0} enquiries</strong>
+                                    </h5>
+                                    <p className="status-summary-line">
+                                        {analyticsData.total || 0} total —{' '}
+                                        <span className="summary-new">{analyticsData.statusBreakdown?.NEW || 0} New</span>,{' '}
+                                        <span className="summary-contacted">{analyticsData.statusBreakdown?.CONTACTED || 0} Contacted</span>,{' '}
+                                        <span className="summary-enrolled">{analyticsData.statusBreakdown?.ENROLLED || 0} Enrolled</span>,{' '}
+                                        <span className="summary-closed">{analyticsData.statusBreakdown?.CLOSED || 0} Closed</span>
+                                    </p>
+                                </div>
+
+                                <div className="analytics-chart-container">
+                                    <ResponsiveContainer width="100%" height={240}>
+                                        <BarChart data={analyticsData.timeline || []} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                                            <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+                                            <XAxis dataKey="label" tick={{ fontSize: 11 }} />
+                                            <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
+                                            <Tooltip
+                                                contentStyle={{
+                                                    background: '#1e1e32',
+                                                    border: '1px solid #33334d',
+                                                    borderRadius: '8px',
+                                                    color: '#fff',
+                                                    fontSize: '12px'
+                                                }}
+                                            />
+                                            <Bar dataKey="count" fill="#800000" radius={[4, 4, 0, 0]} name="Enquiries" />
+                                        </BarChart>
+                                    </ResponsiveContainer>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* ANNOUNCEMENT FORM MODAL */}
+            <AnimatePresence>
+                {isFormOpen && (
+                    <div className="form-modal-backdrop" onClick={() => setIsFormOpen(false)}>
+                        <motion.div
+                            className="form-modal-card"
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="form-modal-header">
+                                <h4>{editingItem ? 'Edit Announcement' : 'Create New Announcement'}</h4>
+                                <button className="admin-close-icon" onClick={() => setIsFormOpen(false)}>
+                                    <X size={16} />
+                                </button>
+                            </div>
+
+                            <form onSubmit={handleSaveNotice} className="admin-form">
+                                <div className="form-group">
+                                    <label>Notice Title *</label>
+                                    <input
+                                        type="text"
+                                        placeholder="e.g. Admissions Open for Session 2026-27"
+                                        value={formData.title}
+                                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                                        required
+                                    />
+                                </div>
+
+                                <div className="form-row-2">
+                                    <div className="form-group">
+                                        <label>Category *</label>
+                                        <select
+                                            value={formData.category}
+                                            onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                                        >
+                                            {categories.map((c) => (
+                                                <option key={c} value={c}>{c}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label>Priority Badge *</label>
+                                        <select
+                                            value={formData.badge}
+                                            onChange={(e) => setFormData({ ...formData, badge: e.target.value })}
+                                        >
+                                            {badges.map((b) => (
+                                                <option key={b} value={b}>{b}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div className="form-group">
+                                    <label>Display Date</label>
+                                    <input
+                                        type="text"
+                                        placeholder="e.g. 28 Jan 2026"
+                                        value={formData.date}
+                                        onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <label>Full Announcement Details *</label>
+                                    <textarea
+                                        rows={4}
+                                        placeholder="Enter complete notice information..."
+                                        value={formData.description}
+                                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                                        required
+                                    />
+                                </div>
+
+                                <div className="form-checkbox">
+                                    <input
+                                        type="checkbox"
+                                        id="isPinned"
+                                        checked={formData.isPinned}
+                                        onChange={(e) => setFormData({ ...formData, isPinned: e.target.checked })}
+                                    />
+                                    <label htmlFor="isPinned">Pin this notice to top of board</label>
+                                </div>
+
+                                <div className="form-actions">
+                                    <button type="button" className="btn btn-outline" onClick={() => setIsFormOpen(false)}>
+                                        Cancel
+                                    </button>
+                                    <button type="submit" className="btn btn-primary">
+                                        {editingItem ? 'Save Changes' : 'Publish Notice'}
+                                    </button>
+                                </div>
+                            </form>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* UPLOAD / EDIT PHOTO MODAL */}
             <AnimatePresence>
                 {isGalleryFormOpen && (
                     <div className="form-modal-backdrop" onClick={() => setIsGalleryFormOpen(false)}>
@@ -979,7 +1690,6 @@ const AdminPanel = ({ onDataChange }) => {
                             </div>
 
                             <form onSubmit={handleSaveGalleryItem} className="admin-form">
-                                {/* Upload Dropzone */}
                                 <div className="form-group">
                                     <label>Upload Image (Cloudinary Direct Storage)</label>
                                     <div className="upload-dropzone compact-dropzone">
