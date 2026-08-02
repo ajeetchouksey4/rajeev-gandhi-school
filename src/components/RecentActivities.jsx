@@ -56,6 +56,13 @@ const fadeInUp = {
     visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
 }
 
+const isHighlightItem = (item) => {
+    if (item.section === 'HIGHLIGHTS') return true
+    const cat = (item.category || '').toLowerCase()
+    const title = (item.title || '').toLowerCase()
+    return cat.includes('highl') || title.includes('annual') || title.includes('championship') || title.includes('parade') || title.includes('exhibition')
+}
+
 const RecentActivities = () => {
     const [activitiesList, setActivitiesList] = useState(defaultActivities)
     const [current, setCurrent] = useState(0)
@@ -69,7 +76,7 @@ const RecentActivities = () => {
             const data = await res.json()
             if (Array.isArray(data)) {
                 const highlightItems = data
-                    .filter(item => item.section === 'HIGHLIGHTS')
+                    .filter(isHighlightItem)
                     .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0))
 
                 if (highlightItems.length > 0) {
@@ -92,7 +99,7 @@ const RecentActivities = () => {
             try {
                 const parsed = JSON.parse(saved)
                 const highlightItems = parsed
-                    .filter(item => item.section === 'HIGHLIGHTS')
+                    .filter(isHighlightItem)
                     .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0))
 
                 if (highlightItems.length > 0) {

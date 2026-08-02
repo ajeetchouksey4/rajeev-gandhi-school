@@ -20,6 +20,13 @@ const fadeInUp = {
     visible: (i) => ({ opacity: 1, y: 0, transition: { duration: 0.5, delay: i * 0.1 } }),
 }
 
+const isFacilityItem = (item) => {
+    if (item.section === 'FACILITIES') return true
+    const cat = (item.category || '').toLowerCase()
+    const title = (item.title || '').toLowerCase()
+    return cat.includes('facil') || title.includes('smart') || title.includes('lab') || title.includes('librar') || title.includes('sport') || title.includes('transport')
+}
+
 const Facilities = () => {
     const [facilitiesList, setFacilitiesList] = useState(defaultFacilities)
 
@@ -29,7 +36,7 @@ const Facilities = () => {
             const data = await res.json()
             if (Array.isArray(data)) {
                 const facItems = data
-                    .filter(item => item.section === 'FACILITIES')
+                    .filter(isFacilityItem)
                     .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0))
 
                 if (facItems.length > 0) {
@@ -52,7 +59,7 @@ const Facilities = () => {
             try {
                 const parsed = JSON.parse(saved)
                 const facItems = parsed
-                    .filter(item => item.section === 'FACILITIES')
+                    .filter(isFacilityItem)
                     .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0))
 
                 if (facItems.length > 0) {
