@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { Routes, Route, useNavigate } from 'react'
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
 import Announcements from './components/Announcements'
@@ -18,8 +19,8 @@ import api from './api/api'
 import './App.css'
 
 function App() {
-  const [isAdminOpen, setIsAdminOpen] = useState(false)
   const [announcementsData, setAnnouncementsData] = useState([])
+  const navigate = useNavigate()
 
   useEffect(() => {
     const fetchInitialData = async () => {
@@ -40,30 +41,40 @@ function App() {
   }, [])
 
   return (
-    <div className="app">
-      <Navbar onOpenAdmin={() => setIsAdminOpen(true)} />
-      <Hero />
-      <Announcements
-        externalAnnouncements={announcementsData}
-        onOpenAdmin={() => setIsAdminOpen(true)}
+    <Routes>
+      <Route
+        path="/"
+        element={
+          <div className="app">
+            <Navbar onOpenAdmin={() => navigate('/admin')} />
+            <Hero />
+            <Announcements
+              externalAnnouncements={announcementsData}
+              onOpenAdmin={() => navigate('/admin')}
+            />
+            <About />
+            <PrincipalDesk />
+            <Academics />
+            <Facilities />
+            <RecentActivities />
+            <Gallery />
+            <Testimonials />
+            <Admissions />
+            <Contact />
+            <Footer />
+            <BackToTop />
+          </div>
+        }
       />
-      <About />
-      <PrincipalDesk />
-      <Academics />
-      <Facilities />
-      <RecentActivities />
-      <Gallery />
-      <Testimonials />
-      <Admissions />
-      <Contact />
-      <Footer />
-      <BackToTop />
-      <AdminPanel
-        isOpen={isAdminOpen}
-        onClose={() => setIsAdminOpen(false)}
-        onDataChange={(data) => setAnnouncementsData(data)}
+      <Route
+        path="/admin"
+        element={
+          <AdminPanel
+            onDataChange={(data) => setAnnouncementsData(data)}
+          />
+        }
       />
-    </div>
+    </Routes>
   )
 }
 

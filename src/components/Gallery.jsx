@@ -1,15 +1,16 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X } from 'lucide-react'
+import api from '../api/api'
 import './Gallery.css'
 
-const images = [
-    { src: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778142942/trophy1_bz0ht0.jpg', label: 'Annual Day Celebration', wide: true },
-    { src: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778130623/assembly2_lu2rg4.jpg', label: 'Yoga Day' },
-    { src: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778142942/trophy3_vrtlrd.jpg', label: 'Sports Day' },
-    { src: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778130962/independence6_kgjyx0.jpg', label: 'Independence Day' },
-    { src: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778130550/lab_sdvj0y.jpg', label: 'Science Exhibition', wide: true },
-    { src: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778130962/independence5_ku7v2n.jpg', label: 'Republic Day' },
+const defaultImages = [
+    { id: 1, imageUrl: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778142942/trophy1_bz0ht0.jpg', title: 'Annual Day Celebration', category: 'Events', wide: true, displayOrder: 1 },
+    { id: 2, imageUrl: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778130623/assembly2_lu2rg4.jpg', title: 'Yoga Day', category: 'Activities', wide: false, displayOrder: 2 },
+    { id: 3, imageUrl: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778142942/trophy3_vrtlrd.jpg', title: 'Sports Day', category: 'Sports', wide: false, displayOrder: 3 },
+    { id: 4, imageUrl: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778130962/independence6_kgjyx0.jpg', title: 'Independence Day', category: 'Celebrations', wide: false, displayOrder: 4 },
+    { id: 5, imageUrl: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778130550/lab_sdvj0y.jpg', title: 'Science Exhibition', category: 'Academics', wide: true, displayOrder: 5 },
+    { id: 6, imageUrl: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778130962/independence5_ku7v2n.jpg', title: 'Republic Day', category: 'Celebrations', wide: false, displayOrder: 6 },
 ]
 
 const fadeInUp = {
@@ -18,7 +19,53 @@ const fadeInUp = {
 }
 
 const Gallery = () => {
+    const [images, setImages] = useState(defaultImages)
     const [selected, setSelected] = useState(null)
+    const [activeFilter, setActiveFilter] = useState('ALL')
+
+    const fetchGallery = async () => {
+        try {
+            const res = await api.get('/gallery')
+            const data = await res.json()
+            if (Array.isArray(data) && data.length > 0) {
+                setImages(data)
+                return
+            }
+        } catch (err) {
+            console.warn('Backend gallery fetch failed, checking local storage:', err.message)
+        }
+        const saved = localStorage.getItem('rg_gallery')
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved)
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                    setImages(parsed)
+                    return
+                }
+            } catch (e) {
+                console.error(e)
+            }
+        }
+        setImages(defaultImages)
+    }
+
+    useEffect(() => {
+        fetchGallery()
+
+        const handleStorageChange = () => fetchGallery()
+        window.addEventListener('storage', handleStorageChange)
+        window.addEventListener('rg_gallery_updated', handleStorageChange)
+        return () => {
+            window.removeEventListener('storage', handleStorageChange)
+            window.removeEventListener('rg_gallery_updated', handleStorageChange)
+        }
+    }, [])
+
+    const categories = ['ALL', ...new Set(images.map(img => img.category).filter(Boolean))]
+
+    const filteredImages = activeFilter === 'ALL'
+        ? images
+        : images.filter(img => img.category === activeFilter)
 
     return (
         <section className="section gallery" id="gallery">
@@ -35,6 +82,20 @@ const Gallery = () => {
                         Photo <span className="gradient-text">Gallery</span>
                     </h2>
                     <p className="section-desc">Glimpses from our vibrant school life and events.</p>
+
+                    {categories.length > 2 && (
+                        <div className="gallery-filter-chips">
+                            {categories.map(cat => (
+                                <button
+                                    key={cat}
+                                    className={`filter-chip ${activeFilter === cat ? 'active' : ''}`}
+                                    onClick={() => setActiveFilter(cat)}
+                                >
+                                    {cat}
+                                </button>
+                            ))}
+                        </div>
+                    )}
                 </motion.div>
 
                 <motion.div
@@ -44,18 +105,23 @@ const Gallery = () => {
                     viewport={{ once: true }}
                     variants={fadeInUp}
                 >
-                    {images.map((img, i) => (
-                        <div
-                            className={`gallery-item ${img.wide ? 'gallery-item-wide' : ''}`}
-                            key={i}
-                            onClick={() => setSelected(img)}
-                        >
-                            <img src={img.src} alt={img.label} loading="lazy" />
-                            <div className="gallery-overlay">
-                                <span>{img.label}</span>
+                    {filteredImages.map((img, i) => {
+                        const imgUrl = img.imageUrl || img.src
+                        const imgTitle = img.title || img.label
+                        return (
+                            <div
+                                className={`gallery-item ${img.wide ? 'gallery-item-wide' : ''}`}
+                                key={img.id || i}
+                                onClick={() => setSelected(img)}
+                            >
+                                <img src={imgUrl} alt={imgTitle} loading="lazy" />
+                                <div className="gallery-overlay">
+                                    <span>{imgTitle}</span>
+                                    {img.category && <span className="gallery-cat-tag">{img.category}</span>}
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        )
+                    })}
                 </motion.div>
             </div>
 
@@ -79,8 +145,11 @@ const Gallery = () => {
                             <button className="lightbox-close" onClick={() => setSelected(null)}>
                                 <X size={24} />
                             </button>
-                            <img src={selected.src} alt={selected.label} />
-                            <p className="lightbox-label">{selected.label}</p>
+                            <img src={selected.imageUrl || selected.src} alt={selected.title || selected.label} />
+                            <div className="lightbox-details">
+                                <p className="lightbox-label">{selected.title || selected.label}</p>
+                                {selected.category && <span className="lightbox-cat">{selected.category}</span>}
+                            </div>
                         </motion.div>
                     </motion.div>
                 )}

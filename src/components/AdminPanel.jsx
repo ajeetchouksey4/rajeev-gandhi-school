@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { useNavigate } from 'react-router-dom'
+import { motion, AnimatePresence, Reorder } from 'framer-motion'
 import {
     Lock,
     X,
@@ -26,7 +27,17 @@ import {
     Send,
     Bell,
     Download,
-    FileSpreadsheet
+    FileSpreadsheet,
+    Image as ImageIcon,
+    UploadCloud,
+    GripVertical,
+    ArrowUp,
+    ArrowDown,
+    Settings,
+    Home,
+    Check,
+    Sparkles,
+    Sliders
 } from 'lucide-react'
 import {
     ResponsiveContainer,
@@ -44,6 +55,16 @@ const categories = ['Admissions', 'Exams', 'Academic', 'Events', 'Circulars']
 const badges = ['URGENT', 'IMPORTANT', 'NOTICE', 'EVENT', 'MEETING']
 const statusOptions = ['ALL', 'NEW', 'CONTACTED', 'ENROLLED', 'CLOSED']
 const categoryFilterOptions = ['ALL', 'ADMISSION', 'GENERAL', 'CAREER', 'BUSINESS']
+const galleryCategoryOptions = ['Events', 'Activities', 'Sports', 'Celebrations', 'Academics', 'Infrastructure', 'General']
+
+const defaultGallerySeed = [
+    { id: 1, title: 'Annual Day Celebration', category: 'Events', imageUrl: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778142942/trophy1_bz0ht0.jpg', wide: true, displayOrder: 1 },
+    { id: 2, title: 'Yoga Day', category: 'Activities', imageUrl: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778130623/assembly2_lu2rg4.jpg', wide: false, displayOrder: 2 },
+    { id: 3, title: 'Sports Day', category: 'Sports', imageUrl: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778142942/trophy3_vrtlrd.jpg', wide: false, displayOrder: 3 },
+    { id: 4, title: 'Independence Day', category: 'Celebrations', imageUrl: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778130962/independence6_kgjyx0.jpg', wide: false, displayOrder: 4 },
+    { id: 5, title: 'Science Exhibition', category: 'Academics', imageUrl: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778130550/lab_sdvj0y.jpg', wide: true, displayOrder: 5 },
+    { id: 6, title: 'Republic Day', category: 'Celebrations', imageUrl: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778130962/independence5_ku7v2n.jpg', wide: false, displayOrder: 6 },
+]
 
 const initialMockEnquiries = [
     {
@@ -87,11 +108,14 @@ const initialMockEnquiries = [
     }
 ]
 
-const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
-    const [isAuthenticated, setIsAuthenticated] = useState(false)
+const AdminPanel = ({ onDataChange }) => {
+    const navigate = useNavigate()
+    const [isAuthenticated, setIsAuthenticated] = useState(() => {
+        return sessionStorage.getItem('rg_admin_auth') === 'true'
+    })
     const [passcode, setPasscode] = useState('')
     const [authError, setAuthError] = useState('')
-    const [activeTab, setActiveTab] = useState('enquiries') // 'enquiries' | 'notices'
+    const [activeTab, setActiveTab] = useState('enquiries') // 'enquiries' | 'notices' | 'gallery'
 
     // Announcements state
     const [announcements, setAnnouncements] = useState([])
@@ -128,6 +152,27 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
         statusBreakdown: { NEW: 0, CONTACTED: 0, ENROLLED: 0, CLOSED: 0 },
         categoryBreakdown: { ADMISSION: 0, GENERAL: 0, CAREER: 0, BUSINESS: 0 },
         timeline: []
+    })
+
+    // Gallery state
+    const [galleryItems, setGalleryItems] = useState([])
+    const [isGalleryFormOpen, setIsGalleryFormOpen] = useState(false)
+    const [editingGalleryItem, setEditingGalleryItem] = useState(null)
+    const [isUploading, setIsUploading] = useState(false)
+    const [uploadProgress, setUploadProgress] = useState(0)
+    const [uploadError, setUploadError] = useState('')
+    const [cloudinaryConfig, setCloudinaryConfig] = useState({
+        cloudName: localStorage.getItem('rg_cloudinary_cloud') || 'dzckejmbq',
+        uploadPreset: localStorage.getItem('rg_cloudinary_preset') || 'rg_school_preset'
+    })
+    const [showConfigModal, setShowConfigModal] = useState(false)
+    const [galleryFormData, setGalleryFormData] = useState({
+        title: '',
+        category: 'Events',
+        imageUrl: '',
+        publicId: '',
+        wide: false,
+        displayOrder: 0
     })
 
     // Fetch announcements
@@ -206,6 +251,43 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
         } finally {
             setLoading(false)
         }
+    }
+
+    // Fetch gallery items
+    const fetchGallery = async () => {
+        setLoading(true)
+        try {
+            const res = await api.get('/gallery')
+            const data = await res.json()
+            if (Array.isArray(data) && data.length > 0) {
+                setGalleryItems(data)
+                setIsBackendConnected(true)
+                localStorage.setItem('rg_gallery', JSON.stringify(data))
+                window.dispatchEvent(new Event('rg_gallery_updated'))
+                setLoading(false)
+                return
+            }
+        } catch (err) {
+            console.warn('Failed to fetch gallery items from backend, using local fallback:', err.message)
+            setIsBackendConnected(false)
+        }
+
+        const saved = localStorage.getItem('rg_gallery')
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved)
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                    setGalleryItems(parsed)
+                    setLoading(false)
+                    return
+                }
+            } catch (e) {
+                console.error(e)
+            }
+        }
+        setGalleryItems(defaultGallerySeed)
+        localStorage.setItem('rg_gallery', JSON.stringify(defaultGallerySeed))
+        setLoading(false)
     }
 
     // Fetch analytics
@@ -312,28 +394,18 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
     }
 
     useEffect(() => {
-        if (isOpen) {
+        if (isAuthenticated) {
             fetchAnnouncements()
             fetchEnquiries()
+            fetchGallery()
         }
-    }, [isOpen, categoryFilter, statusFilter, searchQuery])
+    }, [isAuthenticated, categoryFilter, statusFilter, searchQuery])
 
     useEffect(() => {
         if (isAnalyticsOpen) {
             fetchAnalytics(analyticsRange, analyticsCategoryScope)
         }
     }, [isAnalyticsOpen, analyticsRange, analyticsCategoryScope])
-
-    useEffect(() => {
-        if (isOpen) {
-            document.body.style.overflow = 'hidden'
-        } else {
-            document.body.style.overflow = ''
-        }
-        return () => {
-            document.body.style.overflow = ''
-        }
-    }, [isOpen])
 
     const handleLogin = async (e) => {
         e.preventDefault()
@@ -352,6 +424,7 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                 setPasscode('')
                 fetchEnquiries()
                 fetchAnnouncements()
+                fetchGallery()
             } else {
                 setAuthError(data.message || 'Invalid admin password!')
             }
@@ -363,12 +436,18 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                 setPasscode('')
                 fetchEnquiries()
                 fetchAnnouncements()
+                fetchGallery()
             } else {
                 setAuthError('Invalid admin password or backend unreachable.')
             }
         } finally {
             setLoading(false)
         }
+    }
+
+    const handleLogout = () => {
+        setIsAuthenticated(false)
+        sessionStorage.removeItem('rg_admin_auth')
     }
 
     const handleOpenDetail = async (item) => {
@@ -530,67 +609,234 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
         }
     }
 
-    if (!isOpen) return null
+    // ==========================================
+    // GALLERY MANAGEMENT HANDLERS
+    // ==========================================
+
+    const handleOpenGalleryForm = (item = null) => {
+        if (item) {
+            setEditingGalleryItem(item)
+            setGalleryFormData({
+                title: item.title || '',
+                category: item.category || 'Events',
+                imageUrl: item.imageUrl || '',
+                publicId: item.publicId || '',
+                wide: item.wide || false,
+                displayOrder: item.displayOrder || 0
+            })
+        } else {
+            setEditingGalleryItem(null)
+            setGalleryFormData({
+                title: '',
+                category: 'Events',
+                imageUrl: '',
+                publicId: '',
+                wide: false,
+                displayOrder: galleryItems.length + 1
+            })
+        }
+        setUploadError('')
+        setIsGalleryFormOpen(true)
+    }
+
+    const handleCloudinaryDirectUpload = async (file) => {
+        if (!file) return
+        if (!file.type.startsWith('image/')) {
+            setUploadError('Please select a valid image file.')
+            return
+        }
+
+        setIsUploading(true)
+        setUploadProgress(20)
+        setUploadError('')
+
+        const data = new FormData()
+        data.append('file', file)
+        data.append('upload_preset', cloudinaryConfig.uploadPreset)
+
+        try {
+            setUploadProgress(50)
+            const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudinaryConfig.cloudName}/image/upload`, {
+                method: 'POST',
+                body: data
+            })
+
+            const result = await res.json()
+            setUploadProgress(90)
+
+            if (result.secure_url) {
+                setGalleryFormData(prev => ({
+                    ...prev,
+                    imageUrl: result.secure_url,
+                    publicId: result.public_id || '',
+                    title: prev.title || file.name.replace(/\.[^/.]+$/, "")
+                }))
+                setUploadProgress(100)
+            } else {
+                setUploadError(result.error?.message || 'Cloudinary upload failed. Check your Cloud Name & Unsigned Upload Preset.')
+            }
+        } catch (err) {
+            setUploadError(`Upload network error: ${err.message}. If using Cloudinary public storage, ensure your Upload Preset allows unsigned uploads.`)
+        } finally {
+            setIsUploading(false)
+        }
+    }
+
+    const handleSaveGalleryItem = async (e) => {
+        e.preventDefault()
+        if (!galleryFormData.imageUrl) {
+            setUploadError('Please select an image file or provide an Image URL.')
+            return
+        }
+
+        if (isBackendConnected) {
+            try {
+                if (editingGalleryItem && editingGalleryItem.id) {
+                    await api.put(`/gallery/${editingGalleryItem.id}`, galleryFormData)
+                } else {
+                    await api.post('/gallery', galleryFormData)
+                }
+                await fetchGallery()
+            } catch (err) {
+                alert(`Backend Save Error: ${err.message}`)
+            }
+        } else {
+            let updated = []
+            if (editingGalleryItem) {
+                updated = galleryItems.map(item =>
+                    item.id === editingGalleryItem.id ? { ...item, ...galleryFormData } : item
+                )
+            } else {
+                const newItem = {
+                    id: Date.now(),
+                    ...galleryFormData,
+                    displayOrder: galleryItems.length + 1
+                }
+                updated = [...galleryItems, newItem]
+            }
+            setGalleryItems(updated)
+            localStorage.setItem('rg_gallery', JSON.stringify(updated))
+            window.dispatchEvent(new Event('rg_gallery_updated'))
+        }
+
+        setIsGalleryFormOpen(false)
+    }
+
+    const handleDeleteGalleryItem = async (id) => {
+        if (!window.confirm('Are you sure you want to remove this photo from the gallery?')) return
+
+        if (isBackendConnected) {
+            try {
+                await api.delete(`/gallery/${id}`)
+                await fetchGallery()
+            } catch (err) {
+                alert(`Backend Delete Error: ${err.message}`)
+            }
+        } else {
+            const updated = galleryItems.filter(item => item.id !== id)
+            setGalleryItems(updated)
+            localStorage.setItem('rg_gallery', JSON.stringify(updated))
+            window.dispatchEvent(new Event('rg_gallery_updated'))
+        }
+    }
+
+    const handleReorderGallery = async (newOrder) => {
+        const reordered = newOrder.map((item, index) => ({
+            ...item,
+            displayOrder: index + 1
+        }))
+        setGalleryItems(reordered)
+
+        if (isBackendConnected) {
+            try {
+                await api.put('/gallery/reorder', reordered)
+            } catch (err) {
+                console.error('Failed to save order to backend:', err)
+            }
+        } else {
+            localStorage.setItem('rg_gallery', JSON.stringify(reordered))
+            window.dispatchEvent(new Event('rg_gallery_updated'))
+        }
+    }
+
+    const moveGalleryItem = (index, direction) => {
+        const targetIndex = index + direction
+        if (targetIndex < 0 || targetIndex >= galleryItems.length) return
+
+        const copy = [...galleryItems]
+        const temp = copy[index]
+        copy[index] = copy[targetIndex]
+        copy[targetIndex] = temp
+
+        handleReorderGallery(copy)
+    }
+
+    const handleSaveCloudinaryConfig = (e) => {
+        e.preventDefault()
+        localStorage.setItem('rg_cloudinary_cloud', cloudinaryConfig.cloudName)
+        localStorage.setItem('rg_cloudinary_preset', cloudinaryConfig.uploadPreset)
+        setShowConfigModal(false)
+        alert('Cloudinary public settings updated!')
+    }
 
     return (
-        <div className="admin-overlay" onClick={onClose}>
-            <motion.div
-                className="admin-modal-container"
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                onClick={(e) => e.stopPropagation()}
-            >
-                {/* Admin Modal Header */}
-                <div className="admin-header-bar">
-                    <div className="admin-title-group">
-                        <Lock size={18} className="lock-icon" />
-                        <h3>School Admin Control Center</h3>
+        <div className="admin-page-layout">
+            {/* Top Navigation Bar */}
+            <div className="admin-top-navbar">
+                <div className="container admin-nav-inner">
+                    <div className="admin-brand" onClick={() => navigate('/')}>
+                        <div className="brand-badge">
+                            <Lock size={16} />
+                        </div>
+                        <div>
+                            <h2>Rajeev Gandhi Convent</h2>
+                            <span className="brand-sub">School Administration Portal</span>
+                        </div>
                     </div>
 
-                    <div className="admin-header-right">
+                    <div className="admin-nav-actions">
                         {isAuthenticated && (
-                            <div
-                                className={`backend-status-pill ${
-                                    isBackendConnected ? 'connected' : 'offline'
-                                }`}
-                            >
+                            <div className={`backend-status-pill ${isBackendConnected ? 'connected' : 'offline'}`}>
                                 {isBackendConnected ? <Wifi size={13} /> : <WifiOff size={13} />}
                                 <span>{isBackendConnected ? 'Backend Live' : 'Offline Mode'}</span>
                             </div>
                         )}
-                        <button className="admin-close-icon" onClick={onClose}>
-                            <X size={18} />
+                        <button className="btn-back-home" onClick={() => navigate('/')} title="Return to School Website">
+                            <Home size={15} /> <span>Back to Website</span>
                         </button>
                     </div>
                 </div>
+            </div>
 
-                {/* Main Body */}
+            {/* Main Content Area */}
+            <div className="container admin-page-body">
                 {!isAuthenticated ? (
-                    <div className="admin-login-card">
-                        <div className="login-icon-box">
-                            <Lock size={28} />
-                        </div>
-                        <h4>Admin Portal Access</h4>
-                        <p>Enter the administrator passcode to access enquiries, analytics, and announcements.</p>
+                    <div className="admin-login-wrapper">
+                        <div className="admin-login-card">
+                            <div className="login-icon-box">
+                                <Lock size={32} />
+                            </div>
+                            <h4>Administrator Access</h4>
+                            <p>Enter administrator passcode to access school enquiries, announcements, and photo gallery manager.</p>
 
-                        <form onSubmit={handleLogin} className="login-form">
-                            <input
-                                type="password"
-                                placeholder="Enter admin passcode..."
-                                value={passcode}
-                                onChange={(e) => setPasscode(e.target.value)}
-                                autoFocus
-                            />
-                            {authError && <span className="error-text">{authError}</span>}
-                            <button type="submit" className="btn btn-primary btn-block" disabled={loading}>
-                                {loading ? 'Verifying...' : 'Access Admin Panel'}
-                            </button>
-                        </form>
+                            <form onSubmit={handleLogin} className="login-form">
+                                <input
+                                    type="password"
+                                    placeholder="Enter admin passcode..."
+                                    value={passcode}
+                                    onChange={(e) => setPasscode(e.target.value)}
+                                    autoFocus
+                                />
+                                {authError && <span className="error-text">{authError}</span>}
+                                <button type="submit" className="btn btn-primary btn-block" disabled={loading}>
+                                    {loading ? 'Authenticating...' : 'Access Admin Control Center'}
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 ) : (
-                    <div className="admin-dashboard">
-                        {/* Sidebar / Navigation Tabs */}
+                    <div className="admin-dashboard-container">
+                        {/* Tab Switcher Navigation */}
                         <div className="admin-nav-tabs">
                             <button
                                 className={`nav-tab-btn ${activeTab === 'enquiries' ? 'active' : ''}`}
@@ -598,9 +844,7 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                             >
                                 <MessageSquare size={16} />
                                 <span>Enquiries</span>
-                                {unreadCount > 0 && (
-                                    <span className="unread-badge-chip">{unreadCount}</span>
-                                )}
+                                {unreadCount > 0 && <span className="unread-badge-chip">{unreadCount}</span>}
                             </button>
 
                             <button
@@ -611,12 +855,20 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                                 <span>Announcements</span>
                                 <span className="tab-count-chip">{announcements.length}</span>
                             </button>
+
+                            <button
+                                className={`nav-tab-btn ${activeTab === 'gallery' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('gallery')}
+                            >
+                                <ImageIcon size={16} />
+                                <span>Photo Gallery Manager</span>
+                                <span className="tab-count-chip">{galleryItems.length}</span>
+                            </button>
                         </div>
 
                         {/* ENQUIRIES TAB CONTENT */}
                         {activeTab === 'enquiries' && (
                             <div className="tab-pane">
-                                {/* Toolbar */}
                                 <div className="dashboard-toolbar">
                                     <div className="toolbar-left search-and-filter">
                                         <div className="search-box">
@@ -681,13 +933,12 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                                         >
                                             <BarChart2 size={15} /> Analytics
                                         </button>
-                                        <button className="btn-logout" onClick={() => setIsAuthenticated(false)} title="Logout">
+                                        <button className="btn-logout" onClick={handleLogout} title="Logout">
                                             <LogOut size={15} />
                                         </button>
                                     </div>
                                 </div>
 
-                                {/* Enquiry Table / Cards List */}
                                 <div className="admin-enquiries-list">
                                     {enquiries.length > 0 ? (
                                         enquiries.map((enq) => {
@@ -771,7 +1022,7 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                                         <button className="btn btn-primary btn-sm" onClick={() => handleOpenForm()}>
                                             <Plus size={15} /> Add Notice
                                         </button>
-                                        <button className="btn-logout" onClick={() => setIsAuthenticated(false)} title="Logout">
+                                        <button className="btn-logout" onClick={handleLogout} title="Logout">
                                             <LogOut size={15} />
                                         </button>
                                     </div>
@@ -799,24 +1050,23 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                                                         <h5 className="item-title">{item.title}</h5>
                                                         <p className="item-desc-preview">{item.description}</p>
                                                     </div>
-
                                                     <div className="item-actions">
                                                         <button
-                                                            className={`icon-action-btn pin-btn ${item.isPinned ? 'active' : ''}`}
+                                                            className={`pin-btn ${item.isPinned ? 'pinned' : ''}`}
                                                             onClick={() => handleTogglePin(item)}
-                                                            title={item.isPinned ? 'Unpin Notice' : 'Pin to Top'}
+                                                            title={item.isPinned ? 'Unpin Notice' : 'Pin Notice'}
                                                         >
                                                             <Pin size={15} />
                                                         </button>
                                                         <button
-                                                            className="icon-action-btn edit-btn"
+                                                            className="edit-btn"
                                                             onClick={() => handleOpenForm(item)}
                                                             title="Edit Notice"
                                                         >
                                                             <Edit2 size={15} />
                                                         </button>
                                                         <button
-                                                            className="icon-action-btn delete-btn"
+                                                            className="delete-btn"
                                                             onClick={() => handleDeleteNotice(item.id)}
                                                             title="Delete Notice"
                                                         >
@@ -828,15 +1078,117 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                                     ) : (
                                         <div className="admin-empty-state">
                                             <AlertCircle size={30} />
-                                            <p>No announcements present. Click "+ Add Notice" to create one.</p>
+                                            <p>No announcements found.</p>
                                         </div>
                                     )}
                                 </div>
                             </div>
                         )}
+
+                        {/* GALLERY MANAGEMENT TAB CONTENT */}
+                        {activeTab === 'gallery' && (
+                            <div className="tab-pane">
+                                <div className="dashboard-toolbar">
+                                    <div className="toolbar-left">
+                                        <h4>School Photo Gallery Manager ({galleryItems.length} photos)</h4>
+                                        <span className="drag-hint-badge">
+                                            <GripVertical size={13} /> Drag cards or use arrows to reorder priority
+                                        </span>
+                                    </div>
+                                    <div className="toolbar-right">
+                                        <button
+                                            className="btn btn-secondary btn-sm"
+                                            onClick={() => setShowConfigModal(true)}
+                                            title="Cloudinary Public Settings"
+                                        >
+                                            <Settings size={14} /> Storage Config
+                                        </button>
+                                        <button className="btn btn-primary btn-sm" onClick={() => handleOpenGalleryForm()}>
+                                            <Plus size={15} /> Upload Photo
+                                        </button>
+                                        <button className="btn-logout" onClick={handleLogout} title="Logout">
+                                            <LogOut size={15} />
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div className="gallery-manager-container">
+                                    <Reorder.Group
+                                        axis="y"
+                                        values={galleryItems}
+                                        onReorder={handleReorderGallery}
+                                        className="gallery-reorder-list"
+                                    >
+                                        {galleryItems.map((img, index) => (
+                                            <Reorder.Item
+                                                key={img.id || index}
+                                                value={img}
+                                                className="gallery-manager-card"
+                                                whileDrag={{ scale: 1.02, boxShadow: '0 8px 24px rgba(0,0,0,0.2)' }}
+                                            >
+                                                <div className="drag-handle" title="Drag to reorder priority">
+                                                    <GripVertical size={18} />
+                                                    <span className="priority-badge">#{index + 1}</span>
+                                                </div>
+
+                                                <div className="gallery-thumb">
+                                                    <img src={img.imageUrl || img.src} alt={img.title} />
+                                                </div>
+
+                                                <div className="gallery-card-info">
+                                                    <div className="card-title-row">
+                                                        <h5>{img.title || 'Untitled Photo'}</h5>
+                                                        {img.wide && <span className="wide-chip">Wide Format</span>}
+                                                    </div>
+                                                    <div className="card-sub-meta">
+                                                        <span className="gallery-cat-pill">{img.category || 'General'}</span>
+                                                        <span className="image-url-preview" title={img.imageUrl}>
+                                                            {img.imageUrl}
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                <div className="reorder-action-btns">
+                                                    <button
+                                                        className="order-btn"
+                                                        onClick={() => moveGalleryItem(index, -1)}
+                                                        disabled={index === 0}
+                                                        title="Move Up"
+                                                    >
+                                                        <ArrowUp size={14} />
+                                                    </button>
+                                                    <button
+                                                        className="order-btn"
+                                                        onClick={() => moveGalleryItem(index, 1)}
+                                                        disabled={index === galleryItems.length - 1}
+                                                        title="Move Down"
+                                                    >
+                                                        <ArrowDown size={14} />
+                                                    </button>
+                                                    <button
+                                                        className="edit-btn"
+                                                        onClick={() => handleOpenGalleryForm(img)}
+                                                        title="Edit Photo Info"
+                                                    >
+                                                        <Edit2 size={14} />
+                                                    </button>
+                                                    <button
+                                                        className="delete-btn"
+                                                        onClick={() => handleDeleteGalleryItem(img.id)}
+                                                        title="Delete Photo"
+                                                    >
+                                                        <Trash2 size={14} />
+                                                    </button>
+                                                </div>
+                                            </Reorder.Item>
+                                        ))}
+                                    </Reorder.Group>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 )}
-            </motion.div>
+            </div>
 
             {/* ENQUIRY DETAIL MODAL */}
             <AnimatePresence>
@@ -850,77 +1202,79 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                             onClick={(e) => e.stopPropagation()}
                         >
                             <div className="form-modal-header">
-                                <div className="detail-title-group">
-                                    <h4>Enquiry Details</h4>
+                                <div>
                                     <span className={`category-badge-chip cat-${(selectedEnquiry.category || 'ADMISSION').toLowerCase()}`}>
                                         {selectedEnquiry.category || 'ADMISSION'}
                                     </span>
-                                    <span className={`status-pill status-${(selectedEnquiry.status || 'NEW').toLowerCase()}`}>
-                                        {selectedEnquiry.status || 'NEW'}
-                                    </span>
+                                    <h4>Enquiry Details #{selectedEnquiry.id}</h4>
                                 </div>
                                 <button className="admin-close-icon" onClick={() => setIsDetailOpen(false)}>
                                     <X size={16} />
                                 </button>
                             </div>
 
-                            <div className="enquiry-detail-body">
-                                <div className="detail-grid">
-                                    <div className="detail-field">
-                                        <label><User size={13} /> Contact Name</label>
-                                        <p>{selectedEnquiry.parentName || 'N/A'}</p>
+                            <div className="enquiry-modal-body">
+                                <div className="info-grid">
+                                    <div className="info-item">
+                                        <label>Contact Name</label>
+                                        <p>{selectedEnquiry.parentName || selectedEnquiry.studentName || 'Visitor'}</p>
                                     </div>
+
                                     {(selectedEnquiry.category || 'ADMISSION') === 'ADMISSION' && (
                                         <>
-                                            <div className="detail-field">
-                                                <label><User size={13} /> Student Name</label>
+                                            <div className="info-item">
+                                                <label>Student Name</label>
                                                 <p>{selectedEnquiry.studentName || 'N/A'}</p>
                                             </div>
-                                            <div className="detail-field">
-                                                <label><GraduationCap size={13} /> Class Applied For</label>
+                                            <div className="info-item">
+                                                <label>Class Applying For</label>
                                                 <p>{selectedEnquiry.classApplyingFor || selectedEnquiry.classAppliedFor || 'N/A'}</p>
                                             </div>
                                         </>
                                     )}
-                                    <div className="detail-field">
-                                        <label><PhoneCall size={13} /> Phone</label>
-                                        <p>{selectedEnquiry.parentPhone || selectedEnquiry.phone}</p>
+
+                                    <div className="info-item">
+                                        <label>Phone Number</label>
+                                        <p>{selectedEnquiry.parentPhone || selectedEnquiry.phone || 'N/A'}</p>
                                     </div>
-                                    <div className="detail-field">
-                                        <label><Mail size={13} /> Email</label>
-                                        <p>{selectedEnquiry.parentEmail || 'Not provided'}</p>
+
+                                    <div className="info-item">
+                                        <label>Email Address</label>
+                                        <p>{selectedEnquiry.parentEmail || selectedEnquiry.email || 'N/A'}</p>
                                     </div>
-                                    <div className="detail-field">
-                                        <label><Calendar size={13} /> Received Date</label>
+
+                                    <div className="info-item">
+                                        <label>Submitted Date</label>
                                         <p>{selectedEnquiry.createdAt ? new Date(selectedEnquiry.createdAt).toLocaleString() : 'N/A'}</p>
                                     </div>
-                                </div>
 
-                                <div className="detail-message-box">
-                                    <label>Message / Enquiry Details</label>
-                                    <p>{selectedEnquiry.message || 'No additional message submitted.'}</p>
-                                </div>
-
-                                <div className="status-update-section">
-                                    <label>Update Status:</label>
-                                    <div className="status-buttons-row">
-                                        {['NEW', 'CONTACTED', 'ENROLLED', 'CLOSED'].map((st) => (
-                                            <button
-                                                key={st}
-                                                className={`status-btn-choice ${selectedEnquiry.status === st ? 'selected' : ''}`}
-                                                onClick={() => handleStatusChange(selectedEnquiry.id, st)}
-                                            >
-                                                {st}
-                                            </button>
-                                        ))}
+                                    <div className="info-item">
+                                        <label>Current Status</label>
+                                        <select
+                                            value={selectedEnquiry.status || 'NEW'}
+                                            onChange={(e) => handleStatusChange(selectedEnquiry.id, e.target.value)}
+                                            className="modal-status-select"
+                                        >
+                                            {statusOptions.filter(s => s !== 'ALL').map(st => (
+                                                <option key={st} value={st}>{st}</option>
+                                            ))}
+                                        </select>
                                     </div>
                                 </div>
 
-                                <div className="detail-actions-footer">
-                                    <button className="btn btn-whatsapp-full" onClick={() => openWhatsApp(selectedEnquiry)}>
-                                        <Send size={16} /> Open WhatsApp Chat with Contact
-                                    </button>
+                                <div className="info-item full-width">
+                                    <label>Message / Notes</label>
+                                    <div className="message-box">{selectedEnquiry.message || 'No additional details provided.'}</div>
                                 </div>
+                            </div>
+
+                            <div className="form-actions space-between">
+                                <button className="whatsapp-btn-lg" onClick={() => openWhatsApp(selectedEnquiry)}>
+                                    <Send size={15} /> Chat on WhatsApp
+                                </button>
+                                <button className="btn btn-outline" onClick={() => setIsDetailOpen(false)}>
+                                    Close
+                                </button>
                             </div>
                         </motion.div>
                     </div>
@@ -939,68 +1293,37 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                             onClick={(e) => e.stopPropagation()}
                         >
                             <div className="form-modal-header">
-                                <div className="analytics-title-group">
-                                    <BarChart2 size={20} className="analytics-icon" />
-                                    <h4>Enquiry Analytics & Trends</h4>
+                                <div>
+                                    <h4>Enquiry Analytics & Insights</h4>
+                                    <p className="sub-text">Overview of parent enquiries and conversion performance</p>
                                 </div>
                                 <button className="admin-close-icon" onClick={() => setIsAnalyticsOpen(false)}>
                                     <X size={16} />
                                 </button>
                             </div>
 
-                            <div className="analytics-body">
-                                <div className="analytics-range-selector">
-                                    <button
-                                        className={`range-btn ${analyticsRange === 'week' ? 'active' : ''}`}
-                                        onClick={() => setAnalyticsRange('week')}
-                                    >
-                                        Weekly
-                                    </button>
-                                    <button
-                                        className={`range-btn ${analyticsRange === 'month' ? 'active' : ''}`}
-                                        onClick={() => setAnalyticsRange('month')}
-                                    >
-                                        Monthly
-                                    </button>
-                                    <button
-                                        className={`range-btn ${analyticsRange === 'year' ? 'active' : ''}`}
-                                        onClick={() => setAnalyticsRange('year')}
-                                    >
-                                        Yearly
-                                    </button>
-                                </div>
-
-                                <div className="analytics-scope-bar">
-                                    <button
-                                        className={`scope-btn ${analyticsCategoryScope === 'ALL' ? 'active' : ''}`}
-                                        onClick={() => setAnalyticsCategoryScope('ALL')}
-                                    >
-                                        All Enquiries
-                                    </button>
-                                    <button
-                                        className={`scope-btn ${analyticsCategoryScope === 'ADMISSION' ? 'active' : ''}`}
-                                        onClick={() => setAnalyticsCategoryScope('ADMISSION')}
-                                    >
-                                        🎓 Admissions Only
-                                    </button>
-                                    <button
-                                        className={`scope-btn ${analyticsCategoryScope === 'GENERAL' ? 'active' : ''}`}
-                                        onClick={() => setAnalyticsCategoryScope('GENERAL')}
-                                    >
-                                        ❓ General
-                                    </button>
-                                    <button
-                                        className={`scope-btn ${analyticsCategoryScope === 'CAREER' ? 'active' : ''}`}
-                                        onClick={() => setAnalyticsCategoryScope('CAREER')}
-                                    >
-                                        💼 Careers
-                                    </button>
-                                    <button
-                                        className={`scope-btn ${analyticsCategoryScope === 'BUSINESS' ? 'active' : ''}`}
-                                        onClick={() => setAnalyticsCategoryScope('BUSINESS')}
-                                    >
-                                        🤝 Business
-                                    </button>
+                            <div className="analytics-modal-body">
+                                <div className="analytics-controls">
+                                    <div className="time-range-toggle">
+                                        <button
+                                            className={analyticsRange === 'week' ? 'active' : ''}
+                                            onClick={() => setAnalyticsRange('week')}
+                                        >
+                                            This Week
+                                        </button>
+                                        <button
+                                            className={analyticsRange === 'month' ? 'active' : ''}
+                                            onClick={() => setAnalyticsRange('month')}
+                                        >
+                                            This Month
+                                        </button>
+                                        <button
+                                            className={analyticsRange === 'year' ? 'active' : ''}
+                                            onClick={() => setAnalyticsRange('year')}
+                                        >
+                                            This Year
+                                        </button>
+                                    </div>
                                 </div>
 
                                 <div className="analytics-summary-card">
@@ -1134,6 +1457,185 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                                     </button>
                                     <button type="submit" className="btn btn-primary">
                                         {editingItem ? 'Save Changes' : 'Publish Notice'}
+                                    </button>
+                                </div>
+                            </form>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* GALLERY PHOTO FORM / UPLOAD MODAL */}
+            <AnimatePresence>
+                {isGalleryFormOpen && (
+                    <div className="form-modal-backdrop" onClick={() => setIsGalleryFormOpen(false)}>
+                        <motion.div
+                            className="form-modal-card"
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="form-modal-header">
+                                <h4>{editingGalleryItem ? 'Edit Photo Details' : 'Upload New Photo to Gallery'}</h4>
+                                <button className="admin-close-icon" onClick={() => setIsGalleryFormOpen(false)}>
+                                    <X size={16} />
+                                </button>
+                            </div>
+
+                            <form onSubmit={handleSaveGalleryItem} className="admin-form">
+                                {/* Cloudinary Direct File Upload Box */}
+                                <div className="form-group">
+                                    <label>Upload Image (Cloudinary Direct Public Storage)</label>
+                                    <div className="upload-dropzone">
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            id="gallery-file-input"
+                                            onChange={(e) => handleCloudinaryDirectUpload(e.target.files[0])}
+                                            style={{ display: 'none' }}
+                                        />
+                                        <label htmlFor="gallery-file-input" className="dropzone-label">
+                                            <UploadCloud size={32} className="upload-icon" />
+                                            <span>
+                                                {isUploading
+                                                    ? `Uploading to Cloudinary (${uploadProgress}%)...`
+                                                    : 'Click or drop photo here to upload directly'}
+                                            </span>
+                                            <small>Uses Cloudinary Public Unsigned Storage</small>
+                                        </label>
+                                    </div>
+                                    {uploadError && <span className="error-text mt-2">{uploadError}</span>}
+                                </div>
+
+                                <div className="form-group">
+                                    <label>Or Direct Image URL *</label>
+                                    <input
+                                        type="url"
+                                        placeholder="https://res.cloudinary.com/..."
+                                        value={galleryFormData.imageUrl}
+                                        onChange={(e) => setGalleryFormData({ ...galleryFormData, imageUrl: e.target.value })}
+                                        required
+                                    />
+                                </div>
+
+                                {galleryFormData.imageUrl && (
+                                    <div className="image-preview-box">
+                                        <img src={galleryFormData.imageUrl} alt="Preview" />
+                                    </div>
+                                )}
+
+                                <div className="form-group">
+                                    <label>Photo Caption / Title *</label>
+                                    <input
+                                        type="text"
+                                        placeholder="e.g. Science Exhibition 2026"
+                                        value={galleryFormData.title}
+                                        onChange={(e) => setGalleryFormData({ ...galleryFormData, title: e.target.value })}
+                                        required
+                                    />
+                                </div>
+
+                                <div className="form-row-2">
+                                    <div className="form-group">
+                                        <label>Category *</label>
+                                        <select
+                                            value={galleryFormData.category}
+                                            onChange={(e) => setGalleryFormData({ ...galleryFormData, category: e.target.value })}
+                                        >
+                                            {galleryCategoryOptions.map(cat => (
+                                                <option key={cat} value={cat}>{cat}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label>Priority Position / Display Order</label>
+                                        <input
+                                            type="number"
+                                            min="1"
+                                            value={galleryFormData.displayOrder}
+                                            onChange={(e) => setGalleryFormData({ ...galleryFormData, displayOrder: parseInt(e.target.value) || 1 })}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="form-checkbox">
+                                    <input
+                                        type="checkbox"
+                                        id="wide"
+                                        checked={galleryFormData.wide}
+                                        onChange={(e) => setGalleryFormData({ ...galleryFormData, wide: e.target.checked })}
+                                    />
+                                    <label htmlFor="wide">Wide Grid Span (Occupies 2 grid columns in gallery view)</label>
+                                </div>
+
+                                <div className="form-actions">
+                                    <button type="button" className="btn btn-outline" onClick={() => setIsGalleryFormOpen(false)}>
+                                        Cancel
+                                    </button>
+                                    <button type="submit" className="btn btn-primary" disabled={isUploading}>
+                                        {editingGalleryItem ? 'Save Changes' : 'Add to Gallery'}
+                                    </button>
+                                </div>
+                            </form>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* CLOUDINARY CONFIG MODAL */}
+            <AnimatePresence>
+                {showConfigModal && (
+                    <div className="form-modal-backdrop" onClick={() => setShowConfigModal(false)}>
+                        <motion.div
+                            className="form-modal-card"
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="form-modal-header">
+                                <h4>Cloudinary Public Storage Settings</h4>
+                                <button className="admin-close-icon" onClick={() => setShowConfigModal(false)}>
+                                    <X size={16} />
+                                </button>
+                            </div>
+
+                            <form onSubmit={handleSaveCloudinaryConfig} className="admin-form">
+                                <p className="text-sm text-gray-500 mb-4">
+                                    Configure your Cloudinary Cloud Name & Unsigned Upload Preset for direct public uploads without secret API keys.
+                                </p>
+
+                                <div className="form-group">
+                                    <label>Cloudinary Cloud Name *</label>
+                                    <input
+                                        type="text"
+                                        placeholder="e.g. dzckejmbq"
+                                        value={cloudinaryConfig.cloudName}
+                                        onChange={(e) => setCloudinaryConfig({ ...cloudinaryConfig, cloudName: e.target.value })}
+                                        required
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <label>Unsigned Upload Preset Name *</label>
+                                    <input
+                                        type="text"
+                                        placeholder="e.g. rg_school_preset or ml_default"
+                                        value={cloudinaryConfig.uploadPreset}
+                                        onChange={(e) => setCloudinaryConfig({ ...cloudinaryConfig, uploadPreset: e.target.value })}
+                                        required
+                                    />
+                                    <small className="help-text">Must be an Unsigned Upload Preset in Cloudinary Settings -&gt; Upload.</small>
+                                </div>
+
+                                <div className="form-actions">
+                                    <button type="button" className="btn btn-outline" onClick={() => setShowConfigModal(false)}>
+                                        Cancel
+                                    </button>
+                                    <button type="submit" className="btn btn-primary">
+                                        Save Configuration
                                     </button>
                                 </div>
                             </form>
