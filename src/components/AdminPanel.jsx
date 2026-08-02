@@ -835,9 +835,9 @@ const AdminPanel = ({ onDataChange }) => {
         alert('Cloudinary settings saved!')
     }
 
-    const facilitiesPhotos = galleryItems.filter(item => item.section === 'FACILITIES')
-    const highlightsPhotos = galleryItems.filter(item => item.section === 'HIGHLIGHTS')
-    const galleryPhotos = galleryItems.filter(item => !item.section || item.section === 'GALLERY')
+    const facilitiesPhotos = galleryItems.filter(item => item.section === 'FACILITIES').sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0))
+    const highlightsPhotos = galleryItems.filter(item => item.section === 'HIGHLIGHTS').sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0))
+    const galleryPhotos = galleryItems.filter(item => !item.section || item.section === 'GALLERY').sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0))
 
     return (
         <div className="admin-page-layout">

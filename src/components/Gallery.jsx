@@ -28,7 +28,10 @@ const Gallery = () => {
             const res = await api.get('/gallery')
             const data = await res.json()
             if (Array.isArray(data) && data.length > 0) {
-                const galleryOnly = data.filter(img => !img.section || img.section === 'GALLERY')
+                const galleryOnly = data
+                    .filter(img => !img.section || img.section === 'GALLERY')
+                    .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0))
+
                 if (galleryOnly.length > 0) {
                     setImages(galleryOnly)
                     return
@@ -43,7 +46,10 @@ const Gallery = () => {
             try {
                 const parsed = JSON.parse(saved)
                 if (Array.isArray(parsed) && parsed.length > 0) {
-                    const galleryOnly = parsed.filter(img => !img.section || img.section === 'GALLERY')
+                    const galleryOnly = parsed
+                        .filter(img => !img.section || img.section === 'GALLERY')
+                        .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0))
+
                     if (galleryOnly.length > 0) {
                         setImages(galleryOnly)
                         return

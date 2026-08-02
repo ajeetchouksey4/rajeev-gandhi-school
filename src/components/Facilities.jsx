@@ -28,7 +28,10 @@ const Facilities = () => {
             const res = await api.get('/gallery')
             const data = await res.json()
             if (Array.isArray(data)) {
-                const facItems = data.filter(item => item.section === 'FACILITIES')
+                const facItems = data
+                    .filter(item => item.section === 'FACILITIES')
+                    .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0))
+
                 if (facItems.length > 0) {
                     const mapped = facItems.map((item, index) => ({
                         title: item.title,
@@ -48,7 +51,10 @@ const Facilities = () => {
         if (saved) {
             try {
                 const parsed = JSON.parse(saved)
-                const facItems = parsed.filter(item => item.section === 'FACILITIES')
+                const facItems = parsed
+                    .filter(item => item.section === 'FACILITIES')
+                    .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0))
+
                 if (facItems.length > 0) {
                     const mapped = facItems.map((item, index) => ({
                         title: item.title,

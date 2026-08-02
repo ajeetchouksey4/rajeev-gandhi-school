@@ -68,7 +68,10 @@ const RecentActivities = () => {
             const res = await api.get('/gallery')
             const data = await res.json()
             if (Array.isArray(data)) {
-                const highlightItems = data.filter(item => item.section === 'HIGHLIGHTS')
+                const highlightItems = data
+                    .filter(item => item.section === 'HIGHLIGHTS')
+                    .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0))
+
                 if (highlightItems.length > 0) {
                     const mapped = highlightItems.map(item => ({
                         src: item.imageUrl,
@@ -88,7 +91,10 @@ const RecentActivities = () => {
         if (saved) {
             try {
                 const parsed = JSON.parse(saved)
-                const highlightItems = parsed.filter(item => item.section === 'HIGHLIGHTS')
+                const highlightItems = parsed
+                    .filter(item => item.section === 'HIGHLIGHTS')
+                    .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0))
+
                 if (highlightItems.length > 0) {
                     const mapped = highlightItems.map(item => ({
                         src: item.imageUrl,
