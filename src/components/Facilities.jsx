@@ -20,23 +20,14 @@ const fadeInUp = {
     visible: (i) => ({ opacity: 1, y: 0, transition: { duration: 0.5, delay: i * 0.1 } }),
 }
 
-const ensureFacilitiesCoverage = (items) => {
-    let list = [...items]
-    const seedFacs = [
-        { title: 'Smart Classrooms', imageUrl: 'https://images.unsplash.com/photo-1562774053-701939374585?w=500&q=80', category: 'Facilities', section: 'FACILITIES', displayOrder: 1 },
-        { title: 'Science Labs', imageUrl: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778130550/lab_sdvj0y.jpg', category: 'Facilities', section: 'FACILITIES', displayOrder: 2 },
-        { title: 'Library', imageUrl: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=500&q=80', category: 'Facilities', section: 'FACILITIES', displayOrder: 3 },
-        { title: 'Sports Complex', imageUrl: 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=500&q=80', category: 'Facilities', section: 'FACILITIES', displayOrder: 4 },
-        { title: 'Computer Lab', imageUrl: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=500&q=80', category: 'Facilities', section: 'FACILITIES', displayOrder: 5 },
-        { title: 'Transport', imageUrl: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778570845/transport1_gql8sk.jpg', category: 'Facilities', section: 'FACILITIES', displayOrder: 6 }
-    ]
-    seedFacs.forEach(def => {
-        if (!list.some(item => item.title === def.title)) {
-            list.push(def)
-        }
-    })
-    return list
-}
+const seedFacs = [
+    { title: 'Smart Classrooms', imageUrl: 'https://images.unsplash.com/photo-1562774053-701939374585?w=500&q=80', category: 'Facilities', section: 'FACILITIES', displayOrder: 1 },
+    { title: 'Science Labs', imageUrl: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778130550/lab_sdvj0y.jpg', category: 'Facilities', section: 'FACILITIES', displayOrder: 2 },
+    { title: 'Library', imageUrl: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=500&q=80', category: 'Facilities', section: 'FACILITIES', displayOrder: 3 },
+    { title: 'Sports Complex', imageUrl: 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=500&q=80', category: 'Facilities', section: 'FACILITIES', displayOrder: 4 },
+    { title: 'Computer Lab', imageUrl: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=500&q=80', category: 'Facilities', section: 'FACILITIES', displayOrder: 5 },
+    { title: 'Transport', imageUrl: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778570845/transport1_gql8sk.jpg', category: 'Facilities', section: 'FACILITIES', displayOrder: 6 }
+]
 
 const Facilities = () => {
     const [facilitiesList, setFacilitiesList] = useState(defaultFacilities)
@@ -47,19 +38,17 @@ const Facilities = () => {
             const data = await res.json()
             if (Array.isArray(data)) {
                 const facItemsFromDB = data.filter(item => item.section === 'FACILITIES')
-                const facItems = ensureFacilitiesCoverage(facItemsFromDB)
-                    .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0))
+                const facItems = facItemsFromDB.length > 0 ? facItemsFromDB : seedFacs
+                const sorted = [...facItems].sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0))
 
-                if (facItems.length > 0) {
-                    const mapped = facItems.map((item, index) => ({
-                        title: item.title,
-                        img: item.imageUrl,
-                        desc: item.category ? `${item.category} facility at Rajeev Gandhi Convent School.` : 'Modern infrastructure facility.',
-                        icon: iconList[index % iconList.length]
-                    }))
-                    setFacilitiesList(mapped)
-                    return
-                }
+                const mapped = sorted.map((item, index) => ({
+                    title: item.title,
+                    img: item.imageUrl,
+                    desc: item.category ? `${item.category} facility at Rajeev Gandhi Convent School.` : 'Modern infrastructure facility.',
+                    icon: iconList[index % iconList.length]
+                }))
+                setFacilitiesList(mapped)
+                return
             }
         } catch (err) {
             console.warn('Backend fetch for facilities failed, checking local storage:', err.message)
@@ -70,19 +59,17 @@ const Facilities = () => {
             try {
                 const parsed = JSON.parse(saved)
                 const facItemsFromDB = parsed.filter(item => item.section === 'FACILITIES')
-                const facItems = ensureFacilitiesCoverage(facItemsFromDB)
-                    .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0))
+                const facItems = facItemsFromDB.length > 0 ? facItemsFromDB : seedFacs
+                const sorted = [...facItems].sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0))
 
-                if (facItems.length > 0) {
-                    const mapped = facItems.map((item, index) => ({
-                        title: item.title,
-                        img: item.imageUrl,
-                        desc: item.category ? `${item.category} facility.` : 'Modern school facility.',
-                        icon: iconList[index % iconList.length]
-                    }))
-                    setFacilitiesList(mapped)
-                    return
-                }
+                const mapped = sorted.map((item, index) => ({
+                    title: item.title,
+                    img: item.imageUrl,
+                    desc: item.category ? `${item.category} facility.` : 'Modern school facility.',
+                    icon: iconList[index % iconList.length]
+                }))
+                setFacilitiesList(mapped)
+                return
             } catch (e) {
                 console.error(e)
             }

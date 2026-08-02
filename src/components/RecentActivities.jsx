@@ -56,21 +56,12 @@ const fadeInUp = {
     visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
 }
 
-const ensureHighlightsCoverage = (items) => {
-    let list = [...items]
-    const seedHighlights = [
-        { title: 'Annual Day Celebration', imageUrl: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778142942/trophy1_bz0ht0.jpg', category: 'Events', section: 'HIGHLIGHTS', displayOrder: 1 },
-        { title: 'Sports Day Championship', imageUrl: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778142942/trophy3_vrtlrd.jpg', category: 'Sports', section: 'HIGHLIGHTS', displayOrder: 2 },
-        { title: 'Science Exhibition', imageUrl: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778130550/lab_sdvj0y.jpg', category: 'Academics', section: 'HIGHLIGHTS', displayOrder: 3 },
-        { title: 'Republic Day Parade', imageUrl: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778130962/independence5_ku7v2n.jpg', category: 'Celebrations', section: 'HIGHLIGHTS', displayOrder: 4 }
-    ]
-    seedHighlights.forEach(def => {
-        if (!list.some(item => item.title === def.title)) {
-            list.push(def)
-        }
-    })
-    return list
-}
+const seedHighlights = [
+    { title: 'Annual Day Celebration', imageUrl: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778142942/trophy1_bz0ht0.jpg', category: 'Events', section: 'HIGHLIGHTS', displayOrder: 1 },
+    { title: 'Sports Day Championship', imageUrl: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778142942/trophy3_vrtlrd.jpg', category: 'Sports', section: 'HIGHLIGHTS', displayOrder: 2 },
+    { title: 'Science Exhibition', imageUrl: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778130550/lab_sdvj0y.jpg', category: 'Academics', section: 'HIGHLIGHTS', displayOrder: 3 },
+    { title: 'Republic Day Parade', imageUrl: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778130962/independence5_ku7v2n.jpg', category: 'Celebrations', section: 'HIGHLIGHTS', displayOrder: 4 }
+]
 
 const RecentActivities = () => {
     const [activitiesList, setActivitiesList] = useState(defaultActivities)
@@ -85,11 +76,11 @@ const RecentActivities = () => {
             const data = await res.json()
             if (Array.isArray(data)) {
                 const highlightItemsFromDB = data.filter(item => item.section === 'HIGHLIGHTS')
-                const highlightItems = ensureHighlightsCoverage(highlightItemsFromDB)
-                    .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0))
+                const highlightItems = highlightItemsFromDB.length > 0 ? highlightItemsFromDB : seedHighlights
+                const sorted = [...highlightItems].sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0))
 
-                if (highlightItems.length > 0) {
-                    const mapped = highlightItems.map(item => ({
+                if (sorted.length > 0) {
+                    const mapped = sorted.map(item => ({
                         src: item.imageUrl,
                         title: item.title,
                         date: item.category || 'Recent Event',
@@ -108,11 +99,11 @@ const RecentActivities = () => {
             try {
                 const parsed = JSON.parse(saved)
                 const highlightItemsFromDB = parsed.filter(item => item.section === 'HIGHLIGHTS')
-                const highlightItems = ensureHighlightsCoverage(highlightItemsFromDB)
-                    .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0))
+                const highlightItems = highlightItemsFromDB.length > 0 ? highlightItemsFromDB : seedHighlights
+                const sorted = [...highlightItems].sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0))
 
-                if (highlightItems.length > 0) {
-                    const mapped = highlightItems.map(item => ({
+                if (sorted.length > 0) {
+                    const mapped = sorted.map(item => ({
                         src: item.imageUrl,
                         title: item.title,
                         date: item.category || 'Recent Event',
