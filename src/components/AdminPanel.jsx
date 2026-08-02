@@ -26,11 +26,7 @@ import {
     Send,
     Bell,
     Download,
-    FileSpreadsheet,
-    Image,
-    UploadCloud,
-    ArrowUp,
-    ArrowDown
+    FileSpreadsheet
 } from 'lucide-react'
 import {
     ResponsiveContainer,
@@ -48,57 +44,6 @@ const categories = ['Admissions', 'Exams', 'Academic', 'Events', 'Circulars']
 const badges = ['URGENT', 'IMPORTANT', 'NOTICE', 'EVENT', 'MEETING']
 const statusOptions = ['ALL', 'NEW', 'CONTACTED', 'ENROLLED', 'CLOSED']
 const categoryFilterOptions = ['ALL', 'ADMISSION', 'GENERAL', 'CAREER', 'BUSINESS']
-const galleryCategoryOptions = ['ALL', 'FACILITY', 'HIGHLIGHT', 'GENERAL']
-
-const loadCloudinaryWidgetScript = () => {
-    return new Promise((resolve, reject) => {
-        if (window.cloudinary && window.cloudinary.createUploadWidget) {
-            return resolve(window.cloudinary)
-        }
-        const existingScript = document.getElementById('cloudinary-upload-widget-script')
-        if (existingScript) {
-            if (window.cloudinary && window.cloudinary.createUploadWidget) {
-                return resolve(window.cloudinary)
-            }
-            existingScript.addEventListener('load', () => resolve(window.cloudinary))
-            existingScript.addEventListener('error', (err) => reject(err))
-            return
-        }
-        const script = document.createElement('script')
-        script.id = 'cloudinary-upload-widget-script'
-        script.src = 'https://upload-widget.cloudinary.com/global/all.js'
-        script.async = true
-        script.onload = () => resolve(window.cloudinary)
-        script.onerror = (err) => reject(new Error('Failed to load Cloudinary Upload Widget script'))
-        document.body.appendChild(script)
-    })
-}
-
-const loadCloudinaryMediaLibraryScript = () => {
-    return new Promise((resolve, reject) => {
-        if (window.cloudinary && window.cloudinary.openMediaLibrary) {
-            return resolve(window.cloudinary)
-        }
-        const existingScript = document.getElementById('cloudinary-media-library-script')
-        if (existingScript) {
-            if (window.cloudinary && window.cloudinary.openMediaLibrary) {
-                return resolve(window.cloudinary)
-            }
-            existingScript.addEventListener('load', () => resolve(window.cloudinary))
-            existingScript.addEventListener('error', (err) => reject(err))
-            return
-        }
-        const script = document.createElement('script')
-        script.id = 'cloudinary-media-library-script'
-        script.src = 'https://media-library.cloudinary.com/global/all.js'
-        script.async = true
-        script.onload = () => resolve(window.cloudinary)
-        script.onerror = (err) => reject(new Error('Failed to load Cloudinary Media Library script'))
-        document.body.appendChild(script)
-    })
-}
-
-
 
 const initialMockEnquiries = [
     {
@@ -183,20 +128,6 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
         statusBreakdown: { NEW: 0, CONTACTED: 0, ENROLLED: 0, CLOSED: 0 },
         categoryBreakdown: { ADMISSION: 0, GENERAL: 0, CAREER: 0, BUSINESS: 0 },
         timeline: []
-    })
-
-    // Gallery state
-    const [galleryImages, setGalleryImages] = useState([])
-    const [galleryCategoryFilter, setGalleryCategoryFilter] = useState('ALL')
-    const [isGalleryFormOpen, setIsGalleryFormOpen] = useState(false)
-    const [editingGalleryItem, setEditingGalleryItem] = useState(null)
-    const [galleryFormData, setGalleryFormData] = useState({
-        imageUrl: '',
-        category: 'GENERAL',
-        title: '',
-        description: '',
-        eventDate: '',
-        displayOrder: 0
     })
 
     // Fetch announcements
@@ -380,260 +311,12 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
         document.body.removeChild(link)
     }
 
-    // Fetch Gallery Images
-    const fetchGalleryImages = async () => {
-        setLoading(true)
-        try {
-            let endpoint = '/gallery'
-            if (galleryCategoryFilter && galleryCategoryFilter !== 'ALL') {
-                endpoint += `?category=${galleryCategoryFilter}`
-            }
-            const res = await api.get(endpoint)
-            const data = await res.json()
-            if (Array.isArray(data)) {
-                setGalleryImages(data)
-                setIsBackendConnected(true)
-            }
-        } catch (err) {
-            console.warn('Failed to fetch gallery images from backend, using local storage fallback:', err.message)
-            setIsBackendConnected(false)
-            const saved = localStorage.getItem('rg_gallery_images')
-            const localData = saved !== null ? JSON.parse(saved) : initialMockGallery
-            let filtered = [...localData]
-            if (galleryCategoryFilter && galleryCategoryFilter !== 'ALL') {
-                filtered = filtered.filter(item => (item.category || 'GENERAL') === galleryCategoryFilter)
-            }
-            filtered.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0))
-            setGalleryImages(filtered)
-        } finally {
-            setLoading(false)
-        }
-    }
-
-    // Cloudinary credentials state
-    const [cloudName, setCloudName] = useState(() => localStorage.getItem('rg_cloudinary_cloud_name') || import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'dzckejmbq')
-    const [uploadPreset, setUploadPreset] = useState(() => localStorage.getItem('rg_cloudinary_preset') || import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || 'rg_school_preset')
-    const [apiKey, setApiKey] = useState(() => localStorage.getItem('rg_cloudinary_api_key') || import.meta.env.VITE_CLOUDINARY_API_KEY || '911945938763684')
-    const [showCloudinarySettings, setShowCloudinarySettings] = useState(false)
-
-    const handleSaveCloudinarySettings = (newCloudName, newPreset, newApiKey) => {
-        setCloudName(newCloudName)
-        setUploadPreset(newPreset)
-        if (newApiKey !== undefined) setApiKey(newApiKey)
-        localStorage.setItem('rg_cloudinary_cloud_name', newCloudName)
-        localStorage.setItem('rg_cloudinary_preset', newPreset)
-        if (newApiKey !== undefined) localStorage.setItem('rg_cloudinary_api_key', newApiKey)
-    }
-
-    const handleOpenCloudinaryWidget = async () => {
-        try {
-            const cloudinary = await loadCloudinaryWidgetScript()
-            if (!cloudinary || !cloudinary.createUploadWidget) {
-                alert('Cloudinary widget SDK could not be loaded. Please check your internet connection.')
-                return
-            }
-
-            const activeCloudName = cloudName || import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'dzckejmbq'
-            const activePreset = uploadPreset || import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || 'rg_school_preset'
-            const activeApiKey = apiKey || localStorage.getItem('rg_cloudinary_api_key') || '911945938763684'
-            const targetFolder = galleryFormData.category 
-                ? `rajeev-gandhi-school/${galleryFormData.category.toLowerCase()}` 
-                : 'rajeev-gandhi-school'
-
-            const widget = cloudinary.createUploadWidget(
-                {
-                    cloudName: activeCloudName,
-                    apiKey: activeApiKey,
-                    uploadPreset: activePreset,
-                    uploadSignature: async (callback, paramsToSign) => {
-                        try {
-                            const res = await api.post('/gallery/cloudinary-signature', { paramsToSign })
-                            const data = await res.json()
-                            callback(data.signature)
-                        } catch (err) {
-                            console.error('Failed to fetch Cloudinary signature:', err)
-                        }
-                    },
-                    folder: targetFolder,
-                    clientAllowedFormats: ['jpg', 'png', 'webp', 'jpeg'],
-                    maxFileSize: 5242880, // 5MB
-                    multiple: false,
-                    sources: ['local', 'url', 'camera', 'image_search', 'google_drive', 'unsplash'],
-                },
-                (error, result) => {
-                    if (!error && result && result.event === 'success') {
-                        const url = result.info.secure_url
-                        setGalleryFormData((prev) => ({ ...prev, imageUrl: url }))
-                    } else if (error) {
-                        console.error('Cloudinary upload error:', error)
-                    }
-                }
-            )
-            widget.open()
-        } catch (err) {
-            alert(`Could not launch Cloudinary widget: ${err.message}`)
-        }
-    }
-
-    const handleOpenCloudinaryMediaLibrary = async () => {
-        try {
-            const cloudinary = await loadCloudinaryMediaLibraryScript()
-            if (!cloudinary || !cloudinary.openMediaLibrary) {
-                alert('Cloudinary Media Library SDK could not be loaded.')
-                return
-            }
-            const activeCloudName = cloudName || import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'dzckejmbq'
-            const activeApiKey = apiKey || localStorage.getItem('rg_cloudinary_api_key') || '911945938763684'
-
-            cloudinary.openMediaLibrary(
-                {
-                    cloud_name: activeCloudName,
-                    api_key: activeApiKey,
-                    insert_only: true,
-                    multiple: false,
-                },
-                {
-                    insertHandler: function (data) {
-                        if (data && data.assets && data.assets.length > 0) {
-                            const selectedAsset = data.assets[0]
-                            const url = selectedAsset.secure_url
-                            const title = selectedAsset.public_id || selectedAsset.filename || ''
-                            setGalleryFormData((prev) => ({
-                                ...prev,
-                                imageUrl: url,
-                                title: prev.title || title
-                            }))
-                        }
-                    }
-                }
-            )
-        } catch (err) {
-            alert(`Could not launch Media Library: ${err.message}`)
-        }
-    }
-
-    const handleOpenGalleryForm = (item = null) => {
-        if (item) {
-            setEditingGalleryItem(item)
-            setGalleryFormData({
-                imageUrl: item.imageUrl || '',
-                category: item.category || 'GENERAL',
-                title: item.title || '',
-                description: item.description || '',
-                eventDate: item.eventDate || '',
-                displayOrder: item.displayOrder || 0,
-            })
-        } else {
-            setEditingGalleryItem(null)
-            setGalleryFormData({
-                imageUrl: '',
-                category: 'GENERAL',
-                title: '',
-                description: '',
-                eventDate: '',
-                displayOrder: 0,
-            })
-        }
-        setIsGalleryFormOpen(true)
-    }
-
-    const handleSaveGalleryImage = async (e) => {
-        e.preventDefault()
-        if (!galleryFormData.imageUrl) {
-            alert('Please upload or enter an image URL first!')
-            return
-        }
-
-        const payload = {
-            imageUrl: galleryFormData.imageUrl,
-            category: galleryFormData.category || 'GENERAL',
-            title: galleryFormData.title || null,
-            description: galleryFormData.description || null,
-            eventDate: galleryFormData.eventDate || null,
-            displayOrder: parseInt(galleryFormData.displayOrder, 10) || 0
-        }
-
-        if (isBackendConnected) {
-            try {
-                if (editingGalleryItem) {
-                    await api.put(`/gallery/${editingGalleryItem.id}`, payload)
-                } else {
-                    await api.post('/gallery', payload)
-                }
-                await fetchGalleryImages()
-            } catch (err) {
-                alert(`Backend Gallery Save Error: ${err.message}`)
-            }
-        } else {
-            const saved = localStorage.getItem('rg_gallery_images')
-            const list = saved !== null ? JSON.parse(saved) : initialMockGallery
-            let updated = []
-            if (editingGalleryItem) {
-                updated = list.map(item => item.id === editingGalleryItem.id ? { ...item, ...payload } : item)
-            } else {
-                const newItem = { id: Date.now(), ...payload }
-                updated = [newItem, ...list]
-            }
-            localStorage.setItem('rg_gallery_images', JSON.stringify(updated))
-            setGalleryImages(updated)
-        }
-
-        setIsGalleryFormOpen(false)
-        setEditingGalleryItem(null)
-        setGalleryFormData({
-            imageUrl: '',
-            category: 'GENERAL',
-            title: '',
-            description: '',
-            eventDate: '',
-            displayOrder: 0
-        })
-    }
-
-    const handleDeleteGalleryImage = async (id) => {
-        if (!window.confirm('Are you sure you want to delete this gallery image?')) return
-
-        if (isBackendConnected) {
-            try {
-                await api.delete(`/gallery/${id}`)
-                await fetchGalleryImages()
-            } catch (err) {
-                alert(`Backend Delete Error: ${err.message}`)
-            }
-        } else {
-            const saved = localStorage.getItem('rg_gallery_images')
-            const list = saved !== null ? JSON.parse(saved) : initialMockGallery
-            const updated = list.filter(item => item.id !== id)
-            localStorage.setItem('rg_gallery_images', JSON.stringify(updated))
-            setGalleryImages(updated)
-        }
-    }
-
-    const handleUpdateGalleryOrder = async (id, currentOrder, direction) => {
-        const newOrder = direction === 'up' ? Math.max(0, currentOrder - 1) : currentOrder + 1
-        if (isBackendConnected) {
-            try {
-                await api.patch(`/gallery/${id}/order`, { displayOrder: newOrder })
-                await fetchGalleryImages()
-            } catch (err) {
-                alert(`Error updating order: ${err.message}`)
-            }
-        } else {
-            const saved = localStorage.getItem('rg_gallery_images')
-            const list = saved !== null ? JSON.parse(saved) : initialMockGallery
-            const updated = list.map(item => item.id === id ? { ...item, displayOrder: newOrder } : item)
-            localStorage.setItem('rg_gallery_images', JSON.stringify(updated))
-            setGalleryImages(updated.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0)))
-        }
-    }
-
     useEffect(() => {
         if (isOpen) {
             fetchAnnouncements()
             fetchEnquiries()
-            fetchGalleryImages()
         }
-    }, [isOpen, categoryFilter, statusFilter, searchQuery, galleryCategoryFilter])
+    }, [isOpen, categoryFilter, statusFilter, searchQuery])
 
     useEffect(() => {
         if (isAnalyticsOpen) {
@@ -669,7 +352,6 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                 setPasscode('')
                 fetchEnquiries()
                 fetchAnnouncements()
-                fetchGalleryImages()
             } else {
                 setAuthError(data.message || 'Invalid admin password!')
             }
@@ -681,7 +363,6 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                 setPasscode('')
                 fetchEnquiries()
                 fetchAnnouncements()
-                fetchGalleryImages()
             } else {
                 setAuthError('Invalid admin password or backend unreachable.')
             }
@@ -930,15 +611,6 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                                 <span>Announcements</span>
                                 <span className="tab-count-chip">{announcements.length}</span>
                             </button>
-
-                            <button
-                                className={`nav-tab-btn ${activeTab === 'gallery' ? 'active' : ''}`}
-                                onClick={() => setActiveTab('gallery')}
-                            >
-                                <Image size={16} />
-                                <span>Gallery</span>
-                                <span className="tab-count-chip">{galleryImages.length}</span>
-                            </button>
                         </div>
 
                         {/* ENQUIRIES TAB CONTENT */}
@@ -1157,98 +829,6 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                                         <div className="admin-empty-state">
                                             <AlertCircle size={30} />
                                             <p>No announcements present. Click "+ Add Notice" to create one.</p>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        )}
-
-                        {/* GALLERY TAB CONTENT */}
-                        {activeTab === 'gallery' && (
-                            <div className="tab-pane">
-                                <div className="dashboard-toolbar">
-                                    <div className="toolbar-left search-and-filter">
-                                        <h4>Gallery Manager ({galleryImages.length})</h4>
-                                        <select
-                                            className="filter-select"
-                                            value={galleryCategoryFilter}
-                                            onChange={(e) => setGalleryCategoryFilter(e.target.value)}
-                                            title="Filter Gallery Category"
-                                        >
-                                            {galleryCategoryOptions.map(cat => (
-                                                <option key={cat} value={cat}>
-                                                    {cat === 'ALL' ? 'All Categories' : cat}
-                                                </option>
-                                            ))}
-                                        </select>
-                                        <button className="refresh-btn" onClick={fetchGalleryImages} title="Refresh Gallery Data">
-                                            <RefreshCw size={13} className={loading ? 'spin' : ''} />
-                                        </button>
-                                    </div>
-                                    <div className="toolbar-right">
-                                        <button className="btn btn-primary btn-sm" onClick={() => handleOpenGalleryForm()}>
-                                            <Plus size={15} /> Add Gallery Image
-                                        </button>
-                                        <button className="btn-logout" onClick={() => setIsAuthenticated(false)} title="Logout">
-                                            <LogOut size={15} />
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <div className="admin-gallery-grid">
-                                    {galleryImages.length > 0 ? (
-                                        galleryImages.map((img) => (
-                                            <div key={img.id} className="admin-gallery-card">
-                                                <div className="gallery-card-thumb">
-                                                    <img src={img.imageUrl} alt={img.title || 'Gallery item'} />
-                                                    <span className={`category-badge-chip cat-${(img.category || 'GENERAL').toLowerCase()}`}>
-                                                        {img.category}
-                                                    </span>
-                                                    <span className="order-badge">Order: #{img.displayOrder ?? 0}</span>
-                                                </div>
-                                                <div className="gallery-card-body">
-                                                    <h5>{img.title || 'Untitled Photo'}</h5>
-                                                    {img.description && <p className="gallery-card-desc">{img.description}</p>}
-                                                    {img.eventDate && <span className="gallery-card-date">📅 {img.eventDate}</span>}
-                                                </div>
-                                                <div className="gallery-card-actions">
-                                                    <div className="order-controls">
-                                                        <button
-                                                            className="icon-action-btn order-btn"
-                                                            onClick={() => handleUpdateGalleryOrder(img.id, img.displayOrder || 0, 'up')}
-                                                            title="Move Up (Decrease order number)"
-                                                        >
-                                                            <ArrowUp size={14} />
-                                                        </button>
-                                                        <button
-                                                            className="icon-action-btn order-btn"
-                                                            onClick={() => handleUpdateGalleryOrder(img.id, img.displayOrder || 0, 'down')}
-                                                            title="Move Down (Increase order number)"
-                                                        >
-                                                            <ArrowDown size={14} />
-                                                        </button>
-                                                    </div>
-                                                    <button
-                                                        className="icon-action-btn edit-btn"
-                                                        onClick={() => handleOpenGalleryForm(img)}
-                                                        title="Edit Image Details & Category"
-                                                    >
-                                                        <Edit2 size={15} />
-                                                    </button>
-                                                    <button
-                                                        className="icon-action-btn delete-btn"
-                                                        onClick={() => handleDeleteGalleryImage(img.id)}
-                                                        title="Delete Image"
-                                                    >
-                                                        <Trash2 size={15} />
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        ))
-                                    ) : (
-                                        <div className="admin-empty-state">
-                                            <AlertCircle size={30} />
-                                            <p>No gallery images uploaded yet for this category.</p>
                                         </div>
                                     )}
                                 </div>
@@ -1554,139 +1134,6 @@ const AdminPanel = ({ isOpen, onClose, onDataChange }) => {
                                     </button>
                                     <button type="submit" className="btn btn-primary">
                                         {editingItem ? 'Save Changes' : 'Publish Notice'}
-                                    </button>
-                                </div>
-                            </form>
-                        </motion.div>
-                    </div>
-                )}
-            </AnimatePresence>
-
-            {/* GALLERY IMAGE UPLOAD MODAL */}
-            <AnimatePresence>
-                {isGalleryFormOpen && (
-                    <div className="form-modal-backdrop" onClick={() => setIsGalleryFormOpen(false)}>
-                        <motion.div
-                            className="form-modal-card gallery-upload-modal"
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.95 }}
-                            onClick={(e) => e.stopPropagation()}
-                        >
-                            <div className="form-modal-header">
-                                <h4>{editingGalleryItem ? 'Edit Gallery Image' : 'Add New Gallery Image'}</h4>
-                                <button className="admin-close-icon" onClick={() => setIsGalleryFormOpen(false)}>
-                                    <X size={16} />
-                                </button>
-                            </div>
-
-                            <form onSubmit={handleSaveGalleryImage} className="admin-form">
-                                <div className="form-group cloudinary-upload-section">
-                                    <label>Cloudinary Image Upload *</label>
-                                    <div className="cloudinary-box-trigger">
-                                        <div className="dual-widget-buttons">
-                                            <button
-                                                type="button"
-                                                className="btn btn-cloudinary-widget"
-                                                onClick={handleOpenCloudinaryWidget}
-                                                title="Upload new file from device"
-                                            >
-                                                <UploadCloud size={18} />
-                                                <span>Upload New File</span>
-                                            </button>
-                                            <button
-                                                type="button"
-                                                className="btn btn-cloudinary-library"
-                                                onClick={handleOpenCloudinaryMediaLibrary}
-                                                title="Browse all photos from your Cloudinary Account"
-                                            >
-                                                <Image size={18} />
-                                                <span>Cloudinary Media Library</span>
-                                            </button>
-                                        </div>
-                                        <p className="upload-hint">Upload new files or browse existing photos from your Cloudinary account</p>
-                                    </div>
-
-                                    {galleryFormData.imageUrl ? (
-                                        <div className="image-preview-container">
-                                            <img src={galleryFormData.imageUrl} alt="Uploaded preview" />
-                                            <span className="preview-label">Image URL: {galleryFormData.imageUrl}</span>
-                                        </div>
-                                    ) : (
-                                        <div className="form-group margin-top-sm">
-                                            <input
-                                                type="url"
-                                                placeholder="Or paste direct Cloudinary image URL..."
-                                                value={galleryFormData.imageUrl}
-                                                onChange={(e) => setGalleryFormData({ ...galleryFormData, imageUrl: e.target.value })}
-                                            />
-                                        </div>
-                                    )}
-                                </div>
-
-                                <div className="form-row-2">
-                                    <div className="form-group">
-                                        <label>Gallery Category *</label>
-                                        <select
-                                            value={galleryFormData.category}
-                                            onChange={(e) => setGalleryFormData({ ...galleryFormData, category: e.target.value })}
-                                            required
-                                        >
-                                            <option value="GENERAL">General</option>
-                                            <option value="FACILITY">Facility</option>
-                                            <option value="HIGHLIGHT">Highlight</option>
-                                        </select>
-                                    </div>
-
-                                    <div className="form-group">
-                                        <label>Display Order (Priority #)</label>
-                                        <input
-                                            type="number"
-                                            placeholder="e.g. 1, 2, 3"
-                                            value={galleryFormData.displayOrder}
-                                            onChange={(e) => setGalleryFormData({ ...galleryFormData, displayOrder: e.target.value })}
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="form-group">
-                                    <label>Title (Optional)</label>
-                                    <input
-                                        type="text"
-                                        placeholder="e.g. Science Exhibition 2026"
-                                        value={galleryFormData.title}
-                                        onChange={(e) => setGalleryFormData({ ...galleryFormData, title: e.target.value })}
-                                    />
-                                </div>
-
-                                {galleryFormData.category === 'HIGHLIGHT' && (
-                                    <div className="form-group">
-                                        <label>Event Date (Relevant for Highlights)</label>
-                                        <input
-                                            type="text"
-                                            placeholder="e.g. February 2026"
-                                            value={galleryFormData.eventDate}
-                                            onChange={(e) => setGalleryFormData({ ...galleryFormData, eventDate: e.target.value })}
-                                        />
-                                    </div>
-                                )}
-
-                                <div className="form-group">
-                                    <label>Description (Optional)</label>
-                                    <textarea
-                                        rows={3}
-                                        placeholder="Brief caption or description of the photo..."
-                                        value={galleryFormData.description}
-                                        onChange={(e) => setGalleryFormData({ ...galleryFormData, description: e.target.value })}
-                                    />
-                                </div>
-
-                                <div className="form-actions">
-                                    <button type="button" className="btn btn-outline" onClick={() => setIsGalleryFormOpen(false)}>
-                                        Cancel
-                                    </button>
-                                    <button type="submit" className="btn btn-primary" disabled={!galleryFormData.imageUrl}>
-                                        Save Gallery Image
                                     </button>
                                 </div>
                             </form>

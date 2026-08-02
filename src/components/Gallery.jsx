@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X } from 'lucide-react'
-import api from '../api/api'
 import './Gallery.css'
 
-const defaultImages = [
+const images = [
     { src: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778142942/trophy1_bz0ht0.jpg', label: 'Annual Day Celebration', wide: true },
     { src: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778130623/assembly2_lu2rg4.jpg', label: 'Yoga Day' },
     { src: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778142942/trophy3_vrtlrd.jpg', label: 'Sports Day' },
@@ -20,27 +19,6 @@ const fadeInUp = {
 
 const Gallery = () => {
     const [selected, setSelected] = useState(null)
-    const [images, setImages] = useState(defaultImages)
-
-    useEffect(() => {
-        const fetchGallery = async () => {
-            try {
-                const res = await api.get('/gallery?category=GENERAL')
-                const data = await res.json()
-                if (Array.isArray(data) && data.length > 0) {
-                    const mapped = data.map((item, idx) => ({
-                        src: item.imageUrl,
-                        label: item.title || item.description || 'School Photo',
-                        wide: idx % 5 === 0 || idx % 5 === 4
-                    }))
-                    setImages([...mapped, ...defaultImages])
-                }
-            } catch (err) {
-                // Keep default images fallback when offline or no backend
-            }
-        }
-        fetchGallery()
-    }, [])
 
     return (
         <section className="section gallery" id="gallery">

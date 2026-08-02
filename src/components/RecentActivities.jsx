@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronLeft, ChevronRight, Pause, Play, Calendar } from 'lucide-react'
-import api from '../api/api'
 import './RecentActivities.css'
 
-const defaultActivities = [
+const activities = [
     {
         src: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778142942/trophy1_bz0ht0.jpg',
         title: 'Annual Day Celebration 2026',
@@ -69,56 +68,32 @@ const fadeInUp = {
 }
 
 const RecentActivities = () => {
-    const [activities, setActivities] = useState(defaultActivities)
     const [current, setCurrent] = useState(0)
     const [direction, setDirection] = useState(1)
     const [isPlaying, setIsPlaying] = useState(true)
     const [isHovered, setIsHovered] = useState(false)
 
-    useEffect(() => {
-        const fetchHighlights = async () => {
-            try {
-                const res = await api.get('/gallery?category=HIGHLIGHT')
-                const data = await res.json()
-                if (Array.isArray(data) && data.length > 0) {
-                    const mapped = data.map((item) => ({
-                        src: item.imageUrl,
-                        title: item.title || 'School Activity',
-                        date: item.eventDate || 'Recent',
-                        desc: item.description || '',
-                    }))
-                    setActivities(mapped)
-                }
-            } catch (err) {
-                // Fallback to defaultActivities
-            }
-        }
-        fetchHighlights()
-    }, [])
-
     const total = activities.length
 
     const goTo = useCallback((index, dir) => {
         setDirection(dir)
-        setCurrent(index % (total || 1))
-    }, [total])
+        setCurrent(index)
+    }, [])
 
     const next = useCallback(() => {
-        if (total === 0) return
         goTo((current + 1) % total, 1)
     }, [current, total, goTo])
 
     const prev = useCallback(() => {
-        if (total === 0) return
         goTo((current - 1 + total) % total, -1)
     }, [current, total, goTo])
 
     // Auto-play
     useEffect(() => {
-        if (!isPlaying || isHovered || total === 0) return
+        if (!isPlaying || isHovered) return
         const timer = setInterval(next, 4000)
         return () => clearInterval(timer)
-    }, [isPlaying, isHovered, next, total])
+    }, [isPlaying, isHovered, next])
 
     return (
         <section className="section recent-activities" id="activities">
