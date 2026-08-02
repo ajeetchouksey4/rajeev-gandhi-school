@@ -56,11 +56,20 @@ const fadeInUp = {
     visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
 }
 
-const isHighlightItem = (item) => {
-    if (item.section === 'HIGHLIGHTS') return true
-    const cat = (item.category || '').toLowerCase()
-    const title = (item.title || '').toLowerCase()
-    return cat.includes('highl') || title.includes('annual') || title.includes('championship') || title.includes('parade') || title.includes('exhibition')
+const ensureHighlightsCoverage = (items) => {
+    let list = [...items]
+    const seedHighlights = [
+        { title: 'Annual Day Celebration', imageUrl: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778142942/trophy1_bz0ht0.jpg', category: 'Events', section: 'HIGHLIGHTS', displayOrder: 1 },
+        { title: 'Sports Day Championship', imageUrl: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778142942/trophy3_vrtlrd.jpg', category: 'Sports', section: 'HIGHLIGHTS', displayOrder: 2 },
+        { title: 'Science Exhibition', imageUrl: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778130550/lab_sdvj0y.jpg', category: 'Academics', section: 'HIGHLIGHTS', displayOrder: 3 },
+        { title: 'Republic Day Parade', imageUrl: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778130962/independence5_ku7v2n.jpg', category: 'Celebrations', section: 'HIGHLIGHTS', displayOrder: 4 }
+    ]
+    seedHighlights.forEach(def => {
+        if (!list.some(item => item.title === def.title)) {
+            list.push(def)
+        }
+    })
+    return list
 }
 
 const RecentActivities = () => {
@@ -75,8 +84,8 @@ const RecentActivities = () => {
             const res = await api.get('/gallery')
             const data = await res.json()
             if (Array.isArray(data)) {
-                const highlightItems = data
-                    .filter(isHighlightItem)
+                const highlightItemsFromDB = data.filter(item => item.section === 'HIGHLIGHTS')
+                const highlightItems = ensureHighlightsCoverage(highlightItemsFromDB)
                     .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0))
 
                 if (highlightItems.length > 0) {
@@ -98,8 +107,8 @@ const RecentActivities = () => {
         if (saved) {
             try {
                 const parsed = JSON.parse(saved)
-                const highlightItems = parsed
-                    .filter(isHighlightItem)
+                const highlightItemsFromDB = parsed.filter(item => item.section === 'HIGHLIGHTS')
+                const highlightItems = ensureHighlightsCoverage(highlightItemsFromDB)
                     .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0))
 
                 if (highlightItems.length > 0) {

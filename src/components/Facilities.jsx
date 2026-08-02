@@ -20,11 +20,22 @@ const fadeInUp = {
     visible: (i) => ({ opacity: 1, y: 0, transition: { duration: 0.5, delay: i * 0.1 } }),
 }
 
-const isFacilityItem = (item) => {
-    if (item.section === 'FACILITIES') return true
-    const cat = (item.category || '').toLowerCase()
-    const title = (item.title || '').toLowerCase()
-    return cat.includes('facil') || title.includes('smart') || title.includes('lab') || title.includes('librar') || title.includes('sport') || title.includes('transport')
+const ensureFacilitiesCoverage = (items) => {
+    let list = [...items]
+    const seedFacs = [
+        { title: 'Smart Classrooms', imageUrl: 'https://images.unsplash.com/photo-1562774053-701939374585?w=500&q=80', category: 'Facilities', section: 'FACILITIES', displayOrder: 1 },
+        { title: 'Science Labs', imageUrl: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778130550/lab_sdvj0y.jpg', category: 'Facilities', section: 'FACILITIES', displayOrder: 2 },
+        { title: 'Library', imageUrl: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=500&q=80', category: 'Facilities', section: 'FACILITIES', displayOrder: 3 },
+        { title: 'Sports Complex', imageUrl: 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=500&q=80', category: 'Facilities', section: 'FACILITIES', displayOrder: 4 },
+        { title: 'Computer Lab', imageUrl: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=500&q=80', category: 'Facilities', section: 'FACILITIES', displayOrder: 5 },
+        { title: 'Transport', imageUrl: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778570845/transport1_gql8sk.jpg', category: 'Facilities', section: 'FACILITIES', displayOrder: 6 }
+    ]
+    seedFacs.forEach(def => {
+        if (!list.some(item => item.title === def.title)) {
+            list.push(def)
+        }
+    })
+    return list
 }
 
 const Facilities = () => {
@@ -35,8 +46,8 @@ const Facilities = () => {
             const res = await api.get('/gallery')
             const data = await res.json()
             if (Array.isArray(data)) {
-                const facItems = data
-                    .filter(isFacilityItem)
+                const facItemsFromDB = data.filter(item => item.section === 'FACILITIES')
+                const facItems = ensureFacilitiesCoverage(facItemsFromDB)
                     .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0))
 
                 if (facItems.length > 0) {
@@ -58,8 +69,8 @@ const Facilities = () => {
         if (saved) {
             try {
                 const parsed = JSON.parse(saved)
-                const facItems = parsed
-                    .filter(isFacilityItem)
+                const facItemsFromDB = parsed.filter(item => item.section === 'FACILITIES')
+                const facItems = ensureFacilitiesCoverage(facItemsFromDB)
                     .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0))
 
                 if (facItems.length > 0) {
