@@ -794,22 +794,23 @@ const AdminPanel = ({ onDataChange }) => {
 
     // Persist reorder state smoothly after drop / arrow click
     const handlePersistSectionReorder = (sectionName, itemsToPersist) => {
-        const otherItems = galleryItems.filter(item => (item.section || 'GALLERY') !== sectionName)
-        const reorderedSectionItems = itemsToPersist.map((item, idx) => ({
-            ...item,
-            section: sectionName,
-            displayOrder: idx + 1
-        }))
-        const mergedAll = [...otherItems, ...reorderedSectionItems]
+        setGalleryItems(prevItems => {
+            const otherItems = prevItems.filter(item => (item.section || 'GALLERY') !== sectionName)
+            const reorderedSectionItems = itemsToPersist.map((item, idx) => ({
+                ...item,
+                section: sectionName,
+                displayOrder: idx + 1
+            }))
+            const mergedAll = [...otherItems, ...reorderedSectionItems]
 
-        setGalleryItems(mergedAll)
-
-        if (isBackendConnected) {
-            api.put('/gallery/reorder', mergedAll).catch(err => console.error('Failed to sync reorder to backend:', err))
-        } else {
-            localStorage.setItem('rg_gallery', JSON.stringify(mergedAll))
-            window.dispatchEvent(new Event('rg_gallery_updated'))
-        }
+            if (isBackendConnected) {
+                api.put('/gallery/reorder', mergedAll).catch(err => console.error('Failed to sync reorder to backend:', err))
+            } else {
+                localStorage.setItem('rg_gallery', JSON.stringify(mergedAll))
+                window.dispatchEvent(new Event('rg_gallery_updated'))
+            }
+            return mergedAll
+        })
     }
 
     // Instant 1-Click Left/Right Arrow Swap with Butter-Smooth Framer Motion Animation
