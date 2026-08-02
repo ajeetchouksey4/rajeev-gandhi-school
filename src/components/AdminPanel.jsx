@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence, Reorder } from 'framer-motion'
 import {
@@ -648,9 +648,9 @@ const AdminPanel = ({ onDataChange }) => {
         }
     }
 
-    // ==========================================
-    // GALLERY MANAGEMENT HANDLERS & SWAPPING
-    // ==========================================
+    // =========================================================
+    // HIGH-PERFORMANCE LAG-FREE PHOTO SWAPPING SYSTEM
+    // =========================================================
 
     const handleOpenGalleryForm = (item = null, defaultSection = 'GALLERY') => {
         if (item) {
@@ -781,9 +781,21 @@ const AdminPanel = ({ onDataChange }) => {
         }
     }
 
-    const handleReorderSection = async (sectionName, newSectionItems) => {
+    // Rapid reorder local UI state
+    const handleReorderSectionLocal = (sectionName, newSectionItems) => {
         const otherItems = galleryItems.filter(item => (item.section || 'GALLERY') !== sectionName)
         const reorderedSectionItems = newSectionItems.map((item, idx) => ({
+            ...item,
+            section: sectionName,
+            displayOrder: idx + 1
+        }))
+        setGalleryItems([...otherItems, ...reorderedSectionItems])
+    }
+
+    // Persist reorder state smoothly after drop / arrow click
+    const handlePersistSectionReorder = (sectionName, itemsToPersist) => {
+        const otherItems = galleryItems.filter(item => (item.section || 'GALLERY') !== sectionName)
+        const reorderedSectionItems = itemsToPersist.map((item, idx) => ({
             ...item,
             section: sectionName,
             displayOrder: idx + 1
@@ -793,17 +805,14 @@ const AdminPanel = ({ onDataChange }) => {
         setGalleryItems(mergedAll)
 
         if (isBackendConnected) {
-            try {
-                await api.put('/gallery/reorder', mergedAll)
-            } catch (err) {
-                console.error('Failed to save section order to backend:', err)
-            }
+            api.put('/gallery/reorder', mergedAll).catch(err => console.error('Failed to sync reorder to backend:', err))
         } else {
             localStorage.setItem('rg_gallery', JSON.stringify(mergedAll))
             window.dispatchEvent(new Event('rg_gallery_updated'))
         }
     }
 
+    // Instant 1-Click Left/Right Arrow Swap with Butter-Smooth Framer Motion Animation
     const swapItemPosition = (sectionName, itemIndex, delta) => {
         const sectionItems = galleryItems.filter(item => (item.section || 'GALLERY') === sectionName)
         const targetIndex = itemIndex + delta
@@ -815,7 +824,7 @@ const AdminPanel = ({ onDataChange }) => {
         copy[itemIndex] = copy[targetIndex]
         copy[targetIndex] = temp
 
-        handleReorderSection(sectionName, copy)
+        handlePersistSectionReorder(sectionName, copy)
     }
 
     const handleSaveCloudinaryConfig = (e) => {
@@ -918,7 +927,7 @@ const AdminPanel = ({ onDataChange }) => {
                             </button>
                         </div>
 
-                        {/* RESTORED FULL ENQUIRIES TAB CONTENT */}
+                        {/* ENQUIRIES TAB CONTENT */}
                         {activeTab === 'enquiries' && (
                             <div className="tab-pane">
                                 <div className="dashboard-toolbar">
@@ -1060,7 +1069,7 @@ const AdminPanel = ({ onDataChange }) => {
                             </div>
                         )}
 
-                        {/* RESTORED FULL ANNOUNCEMENTS TAB CONTENT */}
+                        {/* ANNOUNCEMENTS TAB CONTENT */}
                         {activeTab === 'notices' && (
                             <div className="tab-pane">
                                 <div className="dashboard-toolbar">
@@ -1137,13 +1146,13 @@ const AdminPanel = ({ onDataChange }) => {
                             </div>
                         )}
 
-                        {/* SECTIONAL GALLERY MANAGER DASHBOARD */}
+                        {/* ULTRA-SMOOTH SECTIONAL GALLERY MANAGER DASHBOARD */}
                         {activeTab === 'gallery' && (
                             <div className="tab-pane">
                                 <div className="dashboard-toolbar">
                                     <div>
                                         <h4>Sectional Photo Gallery Dashboard</h4>
-                                        <p className="sub-hint-text">Hold & drag images or use ← / → buttons to swap priority for each section live on your site.</p>
+                                        <p className="sub-hint-text">Hold & drag photos or use ← / → buttons to swap priority live on your site.</p>
                                     </div>
                                     <div className="toolbar-right">
                                         <button className="btn btn-secondary btn-sm" onClick={() => setShowConfigModal(true)}>
@@ -1179,18 +1188,20 @@ const AdminPanel = ({ onDataChange }) => {
                                         <Reorder.Group
                                             axis="x"
                                             values={facilitiesPhotos}
-                                            onReorder={(newItems) => handleReorderSection('FACILITIES', newItems)}
+                                            onReorder={(newItems) => handleReorderSectionLocal('FACILITIES', newItems)}
                                             className="horizontal-strip-reorder"
                                         >
                                             {facilitiesPhotos.map((img, idx) => (
                                                 <Reorder.Item
                                                     key={img.id || idx}
                                                     value={img}
+                                                    layout
                                                     className="photo-swap-card"
-                                                    whileDrag={{ scale: 1.05, zIndex: 100 }}
+                                                    whileDrag={{ scale: 1.06, zIndex: 99, boxShadow: '0 12px 28px rgba(0,0,0,0.25)' }}
+                                                    onDragEnd={() => handlePersistSectionReorder('FACILITIES', facilitiesPhotos)}
                                                 >
                                                     <div className="card-image-box">
-                                                        <img src={img.imageUrl} alt={img.title} />
+                                                        <img src={img.imageUrl} alt={img.title} draggable={false} />
                                                         <span className="order-number-badge">#{idx + 1}</span>
                                                     </div>
 
@@ -1255,18 +1266,20 @@ const AdminPanel = ({ onDataChange }) => {
                                         <Reorder.Group
                                             axis="x"
                                             values={highlightsPhotos}
-                                            onReorder={(newItems) => handleReorderSection('HIGHLIGHTS', newItems)}
+                                            onReorder={(newItems) => handleReorderSectionLocal('HIGHLIGHTS', newItems)}
                                             className="horizontal-strip-reorder"
                                         >
                                             {highlightsPhotos.map((img, idx) => (
                                                 <Reorder.Item
                                                     key={img.id || idx}
                                                     value={img}
+                                                    layout
                                                     className="photo-swap-card"
-                                                    whileDrag={{ scale: 1.05, zIndex: 100 }}
+                                                    whileDrag={{ scale: 1.06, zIndex: 99, boxShadow: '0 12px 28px rgba(0,0,0,0.25)' }}
+                                                    onDragEnd={() => handlePersistSectionReorder('HIGHLIGHTS', highlightsPhotos)}
                                                 >
                                                     <div className="card-image-box">
-                                                        <img src={img.imageUrl} alt={img.title} />
+                                                        <img src={img.imageUrl} alt={img.title} draggable={false} />
                                                         <span className="order-number-badge">#{idx + 1}</span>
                                                     </div>
 
@@ -1331,18 +1344,20 @@ const AdminPanel = ({ onDataChange }) => {
                                         <Reorder.Group
                                             axis="x"
                                             values={galleryPhotos}
-                                            onReorder={(newItems) => handleReorderSection('GALLERY', newItems)}
+                                            onReorder={(newItems) => handleReorderSectionLocal('GALLERY', newItems)}
                                             className="horizontal-strip-reorder"
                                         >
                                             {galleryPhotos.map((img, idx) => (
                                                 <Reorder.Item
                                                     key={img.id || idx}
                                                     value={img}
+                                                    layout
                                                     className="photo-swap-card"
-                                                    whileDrag={{ scale: 1.05, zIndex: 100 }}
+                                                    whileDrag={{ scale: 1.06, zIndex: 99, boxShadow: '0 12px 28px rgba(0,0,0,0.25)' }}
+                                                    onDragEnd={() => handlePersistSectionReorder('GALLERY', galleryPhotos)}
                                                 >
                                                     <div className="card-image-box">
-                                                        <img src={img.imageUrl} alt={img.title} />
+                                                        <img src={img.imageUrl} alt={img.title} draggable={false} />
                                                         <span className="order-number-badge">#{idx + 1}</span>
                                                         {img.wide && <span className="wide-tag">Wide</span>}
                                                     </div>
@@ -1396,7 +1411,7 @@ const AdminPanel = ({ onDataChange }) => {
                 )}
             </div>
 
-            {/* ENQUIRY DETAIL MODAL */}
+            {/* ENQUIRY DETAIL MODAL (PREMIUM SPACIOUS UI FIX) */}
             <AnimatePresence>
                 {isDetailOpen && selectedEnquiry && (
                     <div className="form-modal-backdrop" onClick={() => setIsDetailOpen(false)}>
@@ -1408,7 +1423,7 @@ const AdminPanel = ({ onDataChange }) => {
                             onClick={(e) => e.stopPropagation()}
                         >
                             <div className="form-modal-header">
-                                <div>
+                                <div className="modal-header-title-wrap">
                                     <span className={`category-badge-chip cat-${(selectedEnquiry.category || 'ADMISSION').toLowerCase()}`}>
                                         {selectedEnquiry.category || 'ADMISSION'}
                                     </span>
@@ -1422,40 +1437,40 @@ const AdminPanel = ({ onDataChange }) => {
                             <div className="enquiry-modal-body">
                                 <div className="info-grid">
                                     <div className="info-item">
-                                        <label>Contact Name</label>
-                                        <p>{selectedEnquiry.parentName || selectedEnquiry.studentName || 'Visitor'}</p>
+                                        <span className="info-label">Contact / Parent Name</span>
+                                        <p className="info-value">{selectedEnquiry.parentName || selectedEnquiry.studentName || 'Visitor'}</p>
                                     </div>
 
                                     {(selectedEnquiry.category || 'ADMISSION') === 'ADMISSION' && (
                                         <>
                                             <div className="info-item">
-                                                <label>Student Name</label>
-                                                <p>{selectedEnquiry.studentName || 'N/A'}</p>
+                                                <span className="info-label">Student Name</span>
+                                                <p className="info-value">{selectedEnquiry.studentName || 'N/A'}</p>
                                             </div>
                                             <div className="info-item">
-                                                <label>Class Applying For</label>
-                                                <p>{selectedEnquiry.classApplyingFor || selectedEnquiry.classAppliedFor || 'N/A'}</p>
+                                                <span className="info-label">Class Applying For</span>
+                                                <p className="info-value highlight">{selectedEnquiry.classApplyingFor || selectedEnquiry.classAppliedFor || 'N/A'}</p>
                                             </div>
                                         </>
                                     )}
 
                                     <div className="info-item">
-                                        <label>Phone Number</label>
-                                        <p>{selectedEnquiry.parentPhone || selectedEnquiry.phone || 'N/A'}</p>
+                                        <span className="info-label">Phone Number</span>
+                                        <p className="info-value">{selectedEnquiry.parentPhone || selectedEnquiry.phone || 'N/A'}</p>
                                     </div>
 
                                     <div className="info-item">
-                                        <label>Email Address</label>
-                                        <p>{selectedEnquiry.parentEmail || selectedEnquiry.email || 'N/A'}</p>
+                                        <span className="info-label">Email Address</span>
+                                        <p className="info-value">{selectedEnquiry.parentEmail || selectedEnquiry.email || 'N/A'}</p>
                                     </div>
 
                                     <div className="info-item">
-                                        <label>Submitted Date</label>
-                                        <p>{selectedEnquiry.createdAt ? new Date(selectedEnquiry.createdAt).toLocaleString() : 'N/A'}</p>
+                                        <span className="info-label">Submitted Date</span>
+                                        <p className="info-value">{selectedEnquiry.createdAt ? new Date(selectedEnquiry.createdAt).toLocaleString() : 'N/A'}</p>
                                     </div>
 
                                     <div className="info-item">
-                                        <label>Current Status</label>
+                                        <span className="info-label">Current Status</span>
                                         <select
                                             value={selectedEnquiry.status || 'NEW'}
                                             onChange={(e) => handleStatusChange(selectedEnquiry.id, e.target.value)}
@@ -1468,13 +1483,15 @@ const AdminPanel = ({ onDataChange }) => {
                                     </div>
                                 </div>
 
-                                <div className="info-item full-width">
-                                    <label>Message / Notes</label>
-                                    <div className="message-box">{selectedEnquiry.message || 'No additional details provided.'}</div>
+                                <div className="info-item full-width mt-3">
+                                    <span className="info-label">Message / Notes</span>
+                                    <div className="message-box">
+                                        {selectedEnquiry.message || 'No additional details provided.'}
+                                    </div>
                                 </div>
                             </div>
 
-                            <div className="form-actions space-between">
+                            <div className="form-actions modal-footer-actions">
                                 <button className="whatsapp-btn-lg" onClick={() => openWhatsApp(selectedEnquiry)}>
                                     <Send size={15} /> Chat on WhatsApp
                                 </button>
