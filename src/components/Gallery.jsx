@@ -5,12 +5,12 @@ import api from '../api/api'
 import './Gallery.css'
 
 const defaultImages = [
-    { id: 1, imageUrl: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778142942/trophy1_bz0ht0.jpg', title: 'Annual Day Celebration', category: 'Events', wide: true, displayOrder: 1 },
-    { id: 2, imageUrl: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778130623/assembly2_lu2rg4.jpg', title: 'Yoga Day', category: 'Activities', wide: false, displayOrder: 2 },
-    { id: 3, imageUrl: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778142942/trophy3_vrtlrd.jpg', title: 'Sports Day', category: 'Sports', wide: false, displayOrder: 3 },
-    { id: 4, imageUrl: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778130962/independence6_kgjyx0.jpg', title: 'Independence Day', category: 'Celebrations', wide: false, displayOrder: 4 },
-    { id: 5, imageUrl: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778130550/lab_sdvj0y.jpg', title: 'Science Exhibition', category: 'Academics', wide: true, displayOrder: 5 },
-    { id: 6, imageUrl: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778130962/independence5_ku7v2n.jpg', title: 'Republic Day', category: 'Celebrations', wide: false, displayOrder: 6 },
+    { id: 1, imageUrl: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778142942/trophy1_bz0ht0.jpg', title: 'Annual Day Celebration', category: 'Events', wide: true, displayOrder: 1, section: 'GALLERY' },
+    { id: 2, imageUrl: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778130623/assembly2_lu2rg4.jpg', title: 'Yoga Day', category: 'Activities', wide: false, displayOrder: 2, section: 'GALLERY' },
+    { id: 3, imageUrl: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778142942/trophy3_vrtlrd.jpg', title: 'Sports Day', category: 'Sports', wide: false, displayOrder: 3, section: 'GALLERY' },
+    { id: 4, imageUrl: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778130962/independence6_kgjyx0.jpg', title: 'Independence Day', category: 'Celebrations', wide: false, displayOrder: 4, section: 'GALLERY' },
+    { id: 5, imageUrl: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778130550/lab_sdvj0y.jpg', title: 'Science Exhibition', category: 'Academics', wide: true, displayOrder: 5, section: 'GALLERY' },
+    { id: 6, imageUrl: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778130962/independence5_ku7v2n.jpg', title: 'Republic Day', category: 'Celebrations', wide: false, displayOrder: 6, section: 'GALLERY' },
 ]
 
 const fadeInUp = {
@@ -28,19 +28,26 @@ const Gallery = () => {
             const res = await api.get('/gallery')
             const data = await res.json()
             if (Array.isArray(data) && data.length > 0) {
-                setImages(data)
-                return
+                const galleryOnly = data.filter(img => !img.section || img.section === 'GALLERY')
+                if (galleryOnly.length > 0) {
+                    setImages(galleryOnly)
+                    return
+                }
             }
         } catch (err) {
             console.warn('Backend gallery fetch failed, checking local storage:', err.message)
         }
+
         const saved = localStorage.getItem('rg_gallery')
         if (saved) {
             try {
                 const parsed = JSON.parse(saved)
                 if (Array.isArray(parsed) && parsed.length > 0) {
-                    setImages(parsed)
-                    return
+                    const galleryOnly = parsed.filter(img => !img.section || img.section === 'GALLERY')
+                    if (galleryOnly.length > 0) {
+                        setImages(galleryOnly)
+                        return
+                    }
                 }
             } catch (e) {
                 console.error(e)

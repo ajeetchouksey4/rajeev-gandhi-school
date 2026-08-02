@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronLeft, ChevronRight, Pause, Play, Calendar } from 'lucide-react'
+import api from '../api/api'
 import './RecentActivities.css'
 
-const activities = [
+const defaultActivities = [
     {
         src: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778142942/trophy1_bz0ht0.jpg',
         title: 'Annual Day Celebration 2026',
@@ -27,18 +28,6 @@ const activities = [
         title: 'Republic Day Parade',
         date: 'January 2026',
         desc: 'Patriotic celebrations with flag hoisting, march past, and cultural programs.',
-    },
-    {
-        src: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&q=80',
-        title: 'Reading Week Campaign',
-        date: 'November 2025',
-        desc: 'Week-long reading initiatives to promote literacy and love for books.',
-    },
-    {
-        src: 'https://images.unsplash.com/photo-1523050854058-8df90110c476?w=1200&q=80',
-        title: 'Art & Craft Workshop',
-        date: 'October 2025',
-        desc: 'Creative workshop where students explored painting, origami, and clay art.',
     },
 ]
 
@@ -68,12 +57,68 @@ const fadeInUp = {
 }
 
 const RecentActivities = () => {
+    const [activitiesList, setActivitiesList] = useState(defaultActivities)
     const [current, setCurrent] = useState(0)
     const [direction, setDirection] = useState(1)
     const [isPlaying, setIsPlaying] = useState(true)
     const [isHovered, setIsHovered] = useState(false)
 
-    const total = activities.length
+    const fetchHighlights = async () => {
+        try {
+            const res = await api.get('/gallery')
+            const data = await res.json()
+            if (Array.isArray(data)) {
+                const highlightItems = data.filter(item => item.section === 'HIGHLIGHTS')
+                if (highlightItems.length > 0) {
+                    const mapped = highlightItems.map(item => ({
+                        src: item.imageUrl,
+                        title: item.title,
+                        date: item.category || 'Recent Event',
+                        desc: item.title + ' at Rajeev Gandhi Convent School.'
+                    }))
+                    setActivitiesList(mapped)
+                    return
+                }
+            }
+        } catch (err) {
+            console.warn('Backend fetch for highlights failed, checking local storage:', err.message)
+        }
+
+        const saved = localStorage.getItem('rg_gallery')
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved)
+                const highlightItems = parsed.filter(item => item.section === 'HIGHLIGHTS')
+                if (highlightItems.length > 0) {
+                    const mapped = highlightItems.map(item => ({
+                        src: item.imageUrl,
+                        title: item.title,
+                        date: item.category || 'Recent Event',
+                        desc: item.title + ' at Rajeev Gandhi Convent School.'
+                    }))
+                    setActivitiesList(mapped)
+                    return
+                }
+            } catch (e) {
+                console.error(e)
+            }
+        }
+        setActivitiesList(defaultActivities)
+    }
+
+    useEffect(() => {
+        fetchHighlights()
+
+        const handleStorageChange = () => fetchHighlights()
+        window.addEventListener('storage', handleStorageChange)
+        window.addEventListener('rg_gallery_updated', handleStorageChange)
+        return () => {
+            window.removeEventListener('storage', handleStorageChange)
+            window.removeEventListener('rg_gallery_updated', handleStorageChange)
+        }
+    }, [])
+
+    const total = activitiesList.length
 
     const goTo = useCallback((index, dir) => {
         setDirection(dir)
@@ -81,19 +126,23 @@ const RecentActivities = () => {
     }, [])
 
     const next = useCallback(() => {
-        goTo((current + 1) % total, 1)
+        if (total > 0) goTo((current + 1) % total, 1)
     }, [current, total, goTo])
 
     const prev = useCallback(() => {
-        goTo((current - 1 + total) % total, -1)
+        if (total > 0) goTo((current - 1 + total) % total, -1)
     }, [current, total, goTo])
 
     // Auto-play
     useEffect(() => {
-        if (!isPlaying || isHovered) return
+        if (!isPlaying || isHovered || total === 0) return
         const timer = setInterval(next, 4000)
         return () => clearInterval(timer)
-    }, [isPlaying, isHovered, next])
+    }, [isPlaying, isHovered, next, total])
+
+    if (total === 0) return null
+
+    const safeCurrent = current < total ? current : 0
 
     return (
         <section className="section recent-activities" id="activities">
@@ -126,7 +175,7 @@ const RecentActivities = () => {
                     <div className="carousel-viewport">
                         <AnimatePresence initial={false} custom={direction} mode="wait">
                             <motion.div
-                                key={current}
+                                key={safeCurrent}
                                 className="carousel-slide"
                                 custom={direction}
                                 variants={slideVariants}
@@ -136,8 +185,8 @@ const RecentActivities = () => {
                             >
                                 <div className="slide-image-wrapper">
                                     <img
-                                        src={activities[current].src}
-                                        alt={activities[current].title}
+                                        src={activitiesList[safeCurrent].src}
+                                        alt={activitiesList[safeCurrent].title}
                                         loading="lazy"
                                     />
                                     <div className="slide-gradient" />
@@ -145,10 +194,10 @@ const RecentActivities = () => {
                                 <div className="slide-info">
                                     <div className="slide-date">
                                         <Calendar size={14} />
-                                        <span>{activities[current].date}</span>
+                                        <span>{activitiesList[safeCurrent].date}</span>
                                     </div>
-                                    <h3 className="slide-title">{activities[current].title}</h3>
-                                    <p className="slide-desc">{activities[current].desc}</p>
+                                    <h3 className="slide-title">{activitiesList[safeCurrent].title}</h3>
+                                    <p className="slide-desc">{activitiesList[safeCurrent].desc}</p>
                                 </div>
                             </motion.div>
                         </AnimatePresence>
@@ -165,11 +214,11 @@ const RecentActivities = () => {
                     {/* Bottom controls */}
                     <div className="carousel-controls">
                         <div className="carousel-dots">
-                            {activities.map((_, i) => (
+                            {activitiesList.map((_, i) => (
                                 <button
                                     key={i}
-                                    className={`carousel-dot ${i === current ? 'active' : ''}`}
-                                    onClick={() => goTo(i, i > current ? 1 : -1)}
+                                    className={`carousel-dot ${i === safeCurrent ? 'active' : ''}`}
+                                    onClick={() => goTo(i, i > safeCurrent ? 1 : -1)}
                                     aria-label={`Go to slide ${i + 1}`}
                                 />
                             ))}
@@ -187,7 +236,7 @@ const RecentActivities = () => {
                     <div className="carousel-progress">
                         <motion.div
                             className="carousel-progress-bar"
-                            key={`progress-${current}-${isPlaying}`}
+                            key={`progress-${safeCurrent}-${isPlaying}`}
                             initial={{ width: '0%' }}
                             animate={{ width: isPlaying && !isHovered ? '100%' : '0%' }}
                             transition={{ duration: isPlaying && !isHovered ? 4 : 0, ease: 'linear' }}
@@ -203,11 +252,11 @@ const RecentActivities = () => {
                     viewport={{ once: true }}
                     variants={fadeInUp}
                 >
-                    {activities.map((act, i) => (
+                    {activitiesList.map((act, i) => (
                         <button
                             key={i}
-                            className={`thumbnail ${i === current ? 'active' : ''}`}
-                            onClick={() => goTo(i, i > current ? 1 : -1)}
+                            className={`thumbnail ${i === safeCurrent ? 'active' : ''}`}
+                            onClick={() => goTo(i, i > safeCurrent ? 1 : -1)}
                         >
                             <img src={act.src} alt={act.title} loading="lazy" />
                             <span className="thumbnail-label">{act.title}</span>
