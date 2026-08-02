@@ -1,19 +1,16 @@
 import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Monitor, FlaskConical, BookMarked, Dumbbell, Laptop, Bus, Building2 } from 'lucide-react'
 import api from '../api/api'
 import './Facilities.css'
 
 const defaultFacilities = [
-    { icon: Monitor, title: 'Smart Classrooms', img: 'https://images.unsplash.com/photo-1562774053-701939374585?w=500&q=80', desc: 'Interactive digital boards and projectors for engaging visual learning.' },
-    { icon: FlaskConical, title: 'Science Labs', img: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778130550/lab_sdvj0y.jpg', desc: 'Well-equipped Physics, Chemistry & Biology labs for hands-on experiments.' },
-    { icon: BookMarked, title: 'Library', img: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=500&q=80', desc: 'Extensive collection of books, journals, and digital resources.' },
-    { icon: Dumbbell, title: 'Sports Complex', img: 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=500&q=80', desc: 'Playground, indoor games, basketball court & athletic track.' },
-    { icon: Laptop, title: 'Computer Lab', img: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=500&q=80', desc: 'Modern computer lab with latest hardware, software & internet.' },
-    { icon: Bus, title: 'Transport', img: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778570845/transport1_gql8sk.jpg', desc: 'Safe and comfortable bus service covering all major routes.' },
+    { title: 'Smart Classrooms', img: 'https://images.unsplash.com/photo-1562774053-701939374585?w=500&q=80', desc: 'Interactive digital boards and projectors for engaging visual learning.' },
+    { title: 'Science Labs', img: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778130550/lab_sdvj0y.jpg', desc: 'Well-equipped Physics, Chemistry & Biology labs for hands-on experiments.' },
+    { title: 'Library', img: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=500&q=80', desc: 'Extensive collection of books, journals, and digital resources.' },
+    { title: 'Sports Complex', img: 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=500&q=80', desc: 'Playground, indoor games, basketball court & athletic track.' },
+    { title: 'Computer Lab', img: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=500&q=80', desc: 'Modern computer lab with latest hardware, software & internet.' },
+    { title: 'Transport', img: 'https://res.cloudinary.com/dzckejmbq/image/upload/v1778570845/transport1_gql8sk.jpg', desc: 'Safe and comfortable bus service covering all major routes.' },
 ]
-
-const iconList = [Monitor, FlaskConical, BookMarked, Dumbbell, Laptop, Bus, Building2]
 
 const fadeInUp = {
     hidden: { opacity: 0, y: 40 },
@@ -41,11 +38,10 @@ const Facilities = () => {
                 const facItems = facItemsFromDB.length > 0 ? facItemsFromDB : seedFacs
                 const sorted = [...facItems].sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0))
 
-                const mapped = sorted.map((item, index) => ({
+                const mapped = sorted.map((item) => ({
                     title: item.title,
                     img: item.imageUrl,
-                    desc: item.category ? `${item.category} facility at Rajeev Gandhi Convent School.` : 'Modern infrastructure facility.',
-                    icon: iconList[index % iconList.length]
+                    desc: item.category ? `${item.category} facility at Rajeev Gandhi Convent School.` : 'Modern infrastructure facility.'
                 }))
                 setFacilitiesList(mapped)
                 return
@@ -62,11 +58,10 @@ const Facilities = () => {
                 const facItems = facItemsFromDB.length > 0 ? facItemsFromDB : seedFacs
                 const sorted = [...facItems].sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0))
 
-                const mapped = sorted.map((item, index) => ({
+                const mapped = sorted.map((item) => ({
                     title: item.title,
                     img: item.imageUrl,
-                    desc: item.category ? `${item.category} facility.` : 'Modern school facility.',
-                    icon: iconList[index % iconList.length]
+                    desc: item.category ? `${item.category} facility.` : 'Modern school facility.'
                 }))
                 setFacilitiesList(mapped)
                 return
@@ -109,7 +104,6 @@ const Facilities = () => {
 
                 <div className="facilities-grid">
                     {facilitiesList.map((f, i) => {
-                        const Icon = f.icon || Building2
                         return (
                             <motion.div
                                 className="facility-card"
@@ -125,9 +119,6 @@ const Facilities = () => {
                                     <div className="facility-img-overlay" />
                                 </div>
                                 <div className="facility-info">
-                                    <div className="facility-icon-wrap">
-                                        <Icon size={22} />
-                                    </div>
                                     <h4>{f.title}</h4>
                                     <p>{f.desc}</p>
                                 </div>
