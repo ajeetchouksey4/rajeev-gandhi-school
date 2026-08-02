@@ -779,7 +779,7 @@
 }
 
 /* ============================================
-   SECTIONAL PHOTO DASHBOARD STYLES (MS PAINT UI)
+   SECTIONAL PHOTO DASHBOARD STYLES (PURE 1D STRIP FIX)
    ============================================ */
 
 .sections-dashboard-grid {
@@ -864,21 +864,39 @@
     background: var(--maroon-700);
 }
 
-/* Horizontal Card Swapping Strip */
+/* Horizontal Card Swapping Strip (STRICT 1D ROW - NO MULTI-ROW WRAPPING GLITCHES) */
 .horizontal-strip-reorder {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 14px;
-    padding: 4px 0;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    gap: 16px;
+    padding: 8px 4px 16px 4px;
     list-style: none;
     margin: 0;
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+    scrollbar-color: var(--gray-300) transparent;
+}
+
+.horizontal-strip-reorder::-webkit-scrollbar {
+    height: 6px;
+}
+
+.horizontal-strip-reorder::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.horizontal-strip-reorder::-webkit-scrollbar-thumb {
+    background: var(--gray-300);
+    border-radius: 4px;
 }
 
 .photo-swap-card {
     background: var(--white);
     border: 1px solid var(--gray-200);
     border-radius: var(--radius-lg);
-    width: 200px;
+    width: 210px !important;
+    flex-shrink: 0 !important;
     padding: 10px;
     display: flex;
     flex-direction: column;
@@ -887,6 +905,7 @@
     transition: box-shadow 0.2s ease, border-color 0.2s ease;
     cursor: grab;
     user-select: none;
+    position: relative;
 }
 
 .theme-dark .photo-swap-card {
