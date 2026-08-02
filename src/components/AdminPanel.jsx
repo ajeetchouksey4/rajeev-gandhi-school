@@ -1591,7 +1591,7 @@ const AdminPanel = ({ onDataChange }) => {
             {/* ANNOUNCEMENT FORM MODAL */}
             <AnimatePresence>
                 {isFormOpen && (
-                    <div className="form-modal-backdrop" onClick={() => setIsFormOpen(false)}>
+                    <div className="form-modal-backdrop">
                         <motion.div
                             className="form-modal-card"
                             initial={{ opacity: 0, scale: 0.95 }}
@@ -1692,7 +1692,7 @@ const AdminPanel = ({ onDataChange }) => {
             {/* UPLOAD / EDIT PHOTO MODAL */}
             <AnimatePresence>
                 {isGalleryFormOpen && (
-                    <div className="form-modal-backdrop" onClick={() => setIsGalleryFormOpen(false)}>
+                    <div className="form-modal-backdrop">
                         <motion.div
                             className="form-modal-card compact-upload-modal"
                             initial={{ opacity: 0, scale: 0.95 }}
@@ -1743,8 +1743,36 @@ const AdminPanel = ({ onDataChange }) => {
                                 </div>
 
                                 {galleryFormData.imageUrl && (
-                                    <div className="image-preview-box compact-preview">
-                                        <img src={galleryFormData.imageUrl} alt="Preview" />
+                                    <div className="form-group" style={{ margin: '12px 0' }}>
+                                        <label>Image Preview</label>
+                                        <div style={{
+                                            width: '100%',
+                                            height: '140px',
+                                            borderRadius: '8px',
+                                            overflow: 'hidden',
+                                            border: '1px solid var(--gray-200)',
+                                            background: '#fcfcfc',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.03)'
+                                        }}>
+                                            <img 
+                                                src={galleryFormData.imageUrl} 
+                                                alt="Preview" 
+                                                style={{
+                                                    maxWidth: '100%',
+                                                    maxHeight: '100%',
+                                                    objectFit: 'contain'
+                                                }}
+                                                onError={(e) => {
+                                                    e.target.style.display = 'none';
+                                                }}
+                                                onLoad={(e) => {
+                                                    e.target.style.display = 'block';
+                                                }}
+                                            />
+                                        </div>
                                     </div>
                                 )}
 
